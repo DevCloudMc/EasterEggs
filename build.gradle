@@ -1,0 +1,56 @@
+plugins {
+    id 'java'
+}
+
+group 'ru.brainrtp'
+version '3.0'
+
+repositories {
+    maven { url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/" }
+    maven { url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/' }
+    maven { url = 'https://jitpack.io' }
+    maven { url "https://repo.dmulloy2.net/repository/public/" }
+    maven { url "https://mvnrepository.com/artifact/org.spongepowered/configurate-hocon" }
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    // local
+    compileOnly 'org.spigot:spigot:1.17.1'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    implementation group: 'org.spongepowered', name: 'configurate-hocon', version: '4.1.2'
+
+
+    compileOnly 'org.spigotmc:plugin-annotations:1.2.3-SNAPSHOT'
+    annotationProcessor 'org.spigotmc:plugin-annotations:1.2.3-SNAPSHOT'
+
+    compileOnly 'me.clip:placeholderapi:2.10.10'
+
+    compileOnly "com.github.MilkBowl:VaultAPI:1.7.1"
+
+    compileOnly "com.comphenix.protocol:ProtocolLib:4.7.0"
+
+//    // https://mvnrepository.com/artifact/org.spongepowered/configurate-hocon
+//    implementation group: 'org.spongepowered', name: 'configurate-hocon', version: '4.1.1'
+//    compileOnly 'org.spongepowered:configurate-hocon:4.1.1'
+
+
+}
+
+test {
+    useJUnitPlatform()
+}
+
+
+task copyJar {
+    doLast {
+        copy {
+            from "$projectDir/build/libs/EasterEggs-3.0.jar"
+            into "/Users/mac/Desktop/spigat/plugins/"
+        }
+    }
+}
