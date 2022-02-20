@@ -2,11 +2,12 @@ package ru.brainrtp.eastereggs.data.action;
 
 import org.bukkit.entity.Player;
 
-//@FunctionalInterface
 public interface Action {
+
+    String getActionTitle();
 
     void activate(Player player);
 
-    void test();
-
+    // TODO: 26.11.2021 реализовать
+//    void activate(Player player, Placeholder placeholder);
 }

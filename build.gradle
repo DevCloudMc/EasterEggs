@@ -1,16 +1,18 @@
 plugins {
     id 'java'
+    id 'com.github.johnrengelman.shadow' version '7.0.0'
 }
 
 group 'ru.brainrtp'
 version '3.0'
 
 repositories {
-    maven { url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/" }
-    maven { url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/' }
-    maven { url = 'https://jitpack.io' }
-    maven { url "https://repo.dmulloy2.net/repository/public/" }
-    maven { url "https://mvnrepository.com/artifact/org.spongepowered/configurate-hocon" }
+    maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+    maven { url 'https://repo.extendedclip.com/content/repositories/placeholderapi/' }
+    maven { url 'https://jitpack.io' }
+    maven { url 'https://repo.dmulloy2.net/repository/public/' }
+    maven { url 'https://libraries.minecraft.net/' }
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
     mavenCentral()
     mavenLocal()
 }
@@ -19,26 +21,27 @@ dependencies {
     // local
     compileOnly 'org.spigot:spigot:1.17.1'
 
-    // Lombok
+    compileOnly fileTree(dir: 'libs', include: '*.jar')
+
     compileOnly 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
-    implementation group: 'org.spongepowered', name: 'configurate-hocon', version: '4.1.2'
+    compileOnly 'org.spongepowered:configurate-hocon:4.1.2'
+//    implementation 'ru.progrm-jarvis.minecraft:fake-entity-lib:1.0.0-SNAPSHOT'
 
+    implementation 'com.github.juliarn:npc-lib:2.6-RELEASE'
+
+    compileOnly 'com.zaxxer:HikariCP:5.0.1'
+
+    compileOnly 'mysql:mysql-connector-java:8.0.28'
 
     compileOnly 'org.spigotmc:plugin-annotations:1.2.3-SNAPSHOT'
     annotationProcessor 'org.spigotmc:plugin-annotations:1.2.3-SNAPSHOT'
 
     compileOnly 'me.clip:placeholderapi:2.10.10'
 
-    compileOnly "com.github.MilkBowl:VaultAPI:1.7.1"
+    compileOnly 'com.github.MilkBowl:VaultAPI:1.7.1'
 
-    compileOnly "com.comphenix.protocol:ProtocolLib:4.7.0"
-
-//    // https://mvnrepository.com/artifact/org.spongepowered/configurate-hocon
-//    implementation group: 'org.spongepowered', name: 'configurate-hocon', version: '4.1.1'
-//    compileOnly 'org.spongepowered:configurate-hocon:4.1.1'
-
-
+    compileOnly 'com.comphenix.protocol:ProtocolLib:4.7.0'
 }
 
 test {
@@ -50,7 +53,18 @@ task copyJar {
     doLast {
         copy {
             from "$projectDir/build/libs/EasterEggs-3.0.jar"
-            into "/Users/mac/Desktop/spigat/plugins/"
+            into '/Users/mac/Desktop/spigat/plugins/'
+        }
+    }
+}
+
+task buildAndCopyJar {
+    dependsOn(tasks.jar)
+    dependsOn(shadowJar)
+    doLast {
+        copy {
+            from "$projectDir/build/libs/EasterEggs-3.0-all.jar"
+            into '/Users/mac/Desktop/spigat/plugins/'
         }
     }
 }
