@@ -62,7 +62,7 @@ public class PagedList {
             return;
         }
 
-        // TODO: (11.02 16:8) дописать.
+        // TODO: (21.02 15:14) Add :) 
 //        player.sendMessage(EasterEggs.getLang().of("egg.list.empty"));
     }
 

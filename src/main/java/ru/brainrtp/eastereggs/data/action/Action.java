@@ -8,6 +8,6 @@ public interface Action {
 
     void activate(Player player);
 
-    // TODO: 26.11.2021 реализовать
+    // TODO: (21.02 15:8) I think this functionality should be added.
 //    void activate(Player player, Placeholder placeholder);
 }

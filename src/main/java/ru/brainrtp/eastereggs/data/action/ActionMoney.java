@@ -29,7 +29,6 @@ public class ActionMoney implements Action {
 
     @Override
     public void activate(Player player) {
-        // TODO: 28.11.2021 Добавить действие
         EasterEggs.getEconomy().depositPlayer(player, money);
     }
 

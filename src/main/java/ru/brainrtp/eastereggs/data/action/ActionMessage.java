@@ -48,7 +48,7 @@ public class ActionMessage implements Action {
         if (player != null) {
             if (messages != null) {
                 for (String str : messages) {
-                    // TODO: 28.11.2021 ЧОт хуита с плейсхолдерами какая-то
+                    // TODO: (21.02 15:8) I think this functionality (PAPI) should be added.
 //                String line = HandlersProvider.getPlaceholderHandler().replace(player, str);
 //                player.sendMessage(line);
                     player.sendMessage(str);
@@ -78,7 +78,6 @@ public class ActionMessage implements Action {
             if (node.node(MESSAGES_NODE).isNull()) {
                 actionMessage.setMessages(null);
             } else if (node.node(MESSAGES_NODE).isList()) {
-                // TODO: 15.11.2021 Под вопросом т.к должно быть что-то вроде messages.add или .addAll.
                 actionMessage.setMessages(node.node(MESSAGES_NODE).getList(String.class));
             } else {
                 actionMessage.setMessages(List.of(node.node(MESSAGES_NODE).getString()));

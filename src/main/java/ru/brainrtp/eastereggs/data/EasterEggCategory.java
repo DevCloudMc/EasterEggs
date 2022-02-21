@@ -94,7 +94,7 @@ public class EasterEggCategory {
         int founded = EasterEggs.getEggService().getPlayerService().getPlayerData(player.getUniqueId()).size();
         int count = eggs.size();
 
-        // TODO: (1.02 0:24) реализовать
+        // TODO: (21.02 15:10) I think this functionality (PAPI) should be added.
 //        Placeholder ph = new Placeholder();
 //        ph.addData(Placeholder.PLAYER, player.getName());
 //        ph.addData(Placeholder.CATEGORY, name);
@@ -172,11 +172,11 @@ public class EasterEggCategory {
 
             for (EasterEgg easterEgg : easterEggCategory.getEggs().values()) {
                 if (EggTypes.BLOCK.equals(easterEgg.getType())) {
-                    if (easterEgg.getActions() != null) {
-                        // TODO: (15.02 21:25) А хули тут так пусто?)
-                        for (Action action : easterEgg.getActions().getLocalActions()) {
-                        }
-                    }
+//                        // TODO: (21.02 15:11) Should I add actions when creating a new Easter egg?
+//                    if (easterEgg.getActions() != null) {
+//                        for (Action action : easterEgg.getActions().getLocalActions()) {
+//                        }
+//                    }
                     node.node(easterEgg.getId()).set(TypeToken.get(EggBlock.class), (EggBlock) easterEgg);
                 } else {
 //                    node.node(easterEgg.getId()).set(EggEntity.class, (EggEntity) easterEgg);

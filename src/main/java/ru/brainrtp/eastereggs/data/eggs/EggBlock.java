@@ -53,8 +53,7 @@ public class EggBlock extends EasterEgg {
 
         @Override
         public void serialize(Type type, @Nullable EggBlock eggBlock, ConfigurationNode node) throws SerializationException {
-            // TODO: (13.02 17:24) Дописать.
-
+            // TODO: (21.02 15:10) Add additional checks
             node.node(ID_NODE).set(eggBlock.getId());
             node.node(TYPE_NODE).set(eggBlock.getType().toString());
             node.node(LOCATION_NODE).set(TypeToken.get(Location.class), eggBlock.getLocation());

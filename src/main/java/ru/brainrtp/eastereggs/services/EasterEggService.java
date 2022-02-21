@@ -215,7 +215,7 @@ public class EasterEggService {
 
             for (EditSession session : sessions) {
                 if (session.getEditableCategory().equals(category)) {
-                    session.removeHologram(egg.getId());
+                    session.removeHighlighter(egg.getId());
                 }
             }
 
@@ -297,7 +297,7 @@ public class EasterEggService {
     public void stopEditCategory(Player player) {
         String category = getEditor().getEditCategory(player.getUniqueId());
         getEditor().endEditSession(player.getUniqueId());
-        // TODO: (13.02 16:6) Переделать на PAPI
+        // TODO: (21.02 15:10) I think this functionality (PAPI) should be added.
         player.sendMessage(language.getSingleMessage("edit", "end").replace("{category}", category));
     }
 

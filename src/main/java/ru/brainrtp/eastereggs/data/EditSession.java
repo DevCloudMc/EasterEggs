@@ -52,41 +52,9 @@ public class EditSession {
         highlighterMap.put(egg.getId(), Highlighters.create(egg, player));
     }
 
-    // TODO: (19.02 20:37) удалить т.к нигде не вызывается?)
-    public void addHologram(EasterEgg egg) {
-        Location loc = egg.getLocation().clone();
 
-        if (EggTypes.BLOCK.equals(egg.getType())) {
-            loc = loc.add(0.5, 1.7, 0.5);
-        } else {
-            loc = loc.add(0, 2.2, 0);
-        }
-
-        Hologram hologram = Holograms.create(loc);
-//        hologram.setText(String.format(language.getSingleMessage("edit", "hologram"), egg.getId()));
-        // TODO: (13.02 18:44) сделать нормальный формат, а не через replace
-        hologram.setText(language.getSingleMessageWithoutPrefix("edit", "hologram").replace("{number}", String.valueOf(egg.getId())));
-        hologram.show(player);
-
-        holograms.put(egg.getId(), hologram);
-    }
-
-    // TODO: (19.02 20:38) изменить название метода т.к он отвечает за другое? Например, removeHighlighter?
-    public void removeHologram(int eggId) {
+    public void removeHighlighter(int eggId) {
         highlighterMap.get(eggId).clear(player);
-//        if (holograms.containsKey(eggId)) {
-//            holograms.get(eggId).destroy();
-//            holograms.remove(eggId);
-//        }
-    }
-
-    // TODO: (19.02 20:38) А почему нигде не вызывается? Из-за того, что есть #end() чуть выше?
-    public void removeAllHolograms() {
-        for (Hologram hologram : holograms.values()) {
-            hologram.destroy();
-        }
-
-        holograms.clear();
     }
 
 }
