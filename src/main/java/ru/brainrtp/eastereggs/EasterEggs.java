@@ -51,7 +51,7 @@ import java.sql.SQLException;
 @Author("BrainRTP")
 @Libraries({@Library("org.spongepowered:configurate-hocon:4.1.1")})
 @Commands(@Command(name = "eastereggs", desc = "EasterEggs command", aliases = {"ee"}))
-@ApiVersion(ApiVersion.Target.v1_17)
+@ApiVersion(ApiVersion.Target.v1_18)
 public class EasterEggs extends JavaPlugin implements Listener {
 
     private Configuration mainConfig;

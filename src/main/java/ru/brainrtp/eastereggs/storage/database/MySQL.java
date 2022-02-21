@@ -27,7 +27,8 @@ public class MySQL implements Database {
     @Getter
     private final MysqlDataSource dataSource;
     private final Plugin plugin;
-    // TODO: (18.02 21:47) Должно быть такое название
+    // TODO: (21.02 15:13) I'm thinking of changing the name to a more understandable one
+    //  or adding the ability to set the name through the config
 //    private static final String TABLE_NAME = "eastereggs_player_data";
     private static final String TABLE_NAME = "eastereggs";
 

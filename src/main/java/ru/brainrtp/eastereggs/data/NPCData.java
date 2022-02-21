@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 @Data
 public class NPCData {
-    // TODO: (12.02 18:40) Добавить всякие проверки для переменных как в аналогичных сериалайзерах
+    // TODO: (21.02 15:10) Add additional checks
 
     private String name = "Steve";
     private Integer entityId;
