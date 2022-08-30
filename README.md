@@ -9,7 +9,7 @@ Copy the **.jar** file to your plugins folder. Run the server.
 Now, go to the **config.conf**.  
 You will see the following:
 
-```hocon
+```kotlin
 database {
   type: "MySQL" // Available types: MySQL
   host: "localhost"
@@ -96,7 +96,7 @@ At the moment, the team is not working properly.
 
 It's a way easier to configure firework effects in the config:
 
-```hocon
+```kotlin
 firework{
     power=0
     effects:[
@@ -120,7 +120,7 @@ Colors must be set in RGB. The number of effects is unlimited.
 
 Here is an example with each type of easter eggs and actions:
 
-```hocon
+```kotlin
 title="example"
 hidePlayerData=false
 
@@ -174,7 +174,7 @@ hidePlayerData=false
 For each category you can add actions which performs when a player finds all easter eggs from that group.
 You just need to add the `finishAction` to the group file and add actions that you need to perform. 
 
-```hocon
+```kotlin
 title="example"
 hidePlayerData=false
 
