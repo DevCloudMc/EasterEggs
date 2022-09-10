@@ -88,7 +88,7 @@ public class PlayerInteractEntityListener implements Listener {
         }
 
         // Activate egg
-        Optional<EasterEgg> egg = service.getEasterEgg(target.getLocation());
+        Optional<EasterEgg> egg = service.getEasterEgg(target.getUniqueId());
 
         if (egg.isPresent()) {
             if (!service.getPlayerService().isCompletedEgg(player.getUniqueId(), egg.get())) {

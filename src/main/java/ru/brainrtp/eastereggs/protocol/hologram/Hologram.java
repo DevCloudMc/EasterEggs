@@ -42,9 +42,7 @@ public class Hologram implements IHologram {
         WrappedDataWatcher.Registry.get(Byte.class);
         framePacket.setId(id)
                 .setEntityType(EntityType.ARMOR_STAND)
-                .setPosition(location.getX(), location.getY() - 2, location.getZ())
-                .setRotation(0, 0)
-                .setData(3);
+                .setPosition(location.getX(), location.getY() - 2, location.getZ());
         packetContainerList.add(framePacket);
     }
 

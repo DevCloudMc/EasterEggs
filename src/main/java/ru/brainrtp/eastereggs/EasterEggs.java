@@ -12,6 +12,7 @@ import com.google.gson.GsonBuilder;
 import io.sentry.Sentry;
 import lombok.Getter;
 import net.milkbowl.vault.economy.Economy;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -62,7 +63,10 @@ import java.util.Map;
 @Dependency("PacketListenerApi")
 @SoftDependency("PlaceholderAPI")
 @Author("BrainRTP")
-@Libraries({@Library("org.spongepowered:configurate-hocon:4.1.2"), @Library("io.sentry:sentry:6.2.1")})
+@Libraries({
+        @Library("org.spongepowered:configurate-hocon:4.1.2"),
+        @Library("io.sentry:sentry:6.4.1")
+})
 @Commands(@Command(name = "eastereggs", desc = "EasterEggs command", aliases = {"ee"}))
 @ApiVersion(ApiVersion.Target.v1_19)
 public class EasterEggs extends JavaPlugin implements Listener {
@@ -95,6 +99,8 @@ public class EasterEggs extends JavaPlugin implements Listener {
             options.setDsn("https://acf6bda24ea74969bfd7e45542595a07@o1322226.ingest.sentry.io/6579360");
             options.setTracesSampleRate(1.0);
         });
+
+        new Metrics(this, 16399);
 
         // TODO: (19.02 23:12) NPCs temporarily disabled
 //        npcBuilder = new NPCBuilder(this,

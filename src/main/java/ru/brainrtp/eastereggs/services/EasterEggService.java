@@ -15,6 +15,7 @@ import ru.brainrtp.eastereggs.data.action.ActionFirework;
 import ru.brainrtp.eastereggs.data.action.ActionMessage;
 import ru.brainrtp.eastereggs.data.action.Actions;
 import ru.brainrtp.eastereggs.data.eggs.EasterEgg;
+import ru.brainrtp.eastereggs.data.eggs.EggEntity;
 import ru.brainrtp.eastereggs.storage.database.Database;
 
 import java.io.File;
@@ -76,6 +77,28 @@ public class EasterEggService {
         for (EasterEgg egg : eggs) {
             if (egg.getLocation().equals(location)) {
                 Optional<EasterEgg> easterEgg = Optional.of(egg);
+                return Optional.of(egg);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Return easter egg by entity uuid
+     *
+     * @param uuid entity UUID
+     * @return EasterEgg object in Optional wrapper or Optional.EMPTY
+     **/
+    public Optional<EasterEgg> getEasterEgg(UUID uuid) {
+        List<EasterEgg> eggs = getAllEggs().stream()
+                .filter(easterEgg -> EggTypes.ENTITY.equals(easterEgg.getType()))
+                .toList();
+
+
+        for (EasterEgg egg : eggs) {
+            EggEntity eggEntity = (EggEntity) egg;
+            if (eggEntity.getEntityUUID().equals(uuid)) {
                 return Optional.of(egg);
             }
         }
