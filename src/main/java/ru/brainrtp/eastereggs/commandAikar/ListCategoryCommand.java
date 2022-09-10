@@ -31,6 +31,7 @@ public class ListCategoryCommand extends BaseCommand {
     @CommandPermission("eastereggs.admin")
     @Syntax("[page]")
     @Description("List of easter eggs")
+    @CommandCompletion("[page]")
     public void onListCategory(Player player, @Optional @Single @Default("1") Integer page) {
         PagedList pagedList = new PagedList(lang);
 

@@ -55,7 +55,6 @@ public class PagedList {
     }
 
     public void openPage(int page, Player player) {
-        pages.keySet().forEach(System.out::println);
         if (pages.containsKey(page)) {
             player.sendMessage(String.format("%s %s (%s) %s", HEADER_LINE, title, page, HEADER_LINE));
             ComponentBuilder append = new ComponentBuilder().append(getAsArray(pages.get(page)));

@@ -29,7 +29,11 @@ import org.bukkit.plugin.java.annotation.dependency.Library;
 import org.bukkit.plugin.java.annotation.dependency.SoftDependency;
 import org.bukkit.plugin.java.annotation.plugin.ApiVersion;
 import org.bukkit.plugin.java.annotation.plugin.author.Author;
-import ru.brainrtp.eastereggs.commandAikar.HelpCommand;
+import ru.brainrtp.eastereggs.commandAikar.*;
+import ru.brainrtp.eastereggs.commandAikar.action.AddActionCommand;
+import ru.brainrtp.eastereggs.commandAikar.action.RemoveActionCommand;
+import ru.brainrtp.eastereggs.commandAikar.category.CreateCategoryCommand;
+import ru.brainrtp.eastereggs.commandAikar.category.DeleteCategoryCommand;
 import ru.brainrtp.eastereggs.configuration.Configuration;
 import ru.brainrtp.eastereggs.configuration.Language;
 import ru.brainrtp.eastereggs.data.EasterEggCategory;
@@ -238,14 +242,15 @@ public class EasterEggs extends JavaPlugin implements Listener {
         commandManager.registerDependency(Gson.class, gson);
 
         commandManager.registerCommand(new HelpCommand());
-        commandManager.registerCommand(new ru.brainrtp.eastereggs.commandAikar.ReloadCommand());
-        commandManager.registerCommand(new ru.brainrtp.eastereggs.commandAikar.TeleportCommand());
-        commandManager.registerCommand(new ru.brainrtp.eastereggs.commandAikar.ListCategoryCommand());
-        commandManager.registerCommand(new ru.brainrtp.eastereggs.commandAikar.EditCategoryCommand());
-        commandManager.registerCommand(new ru.brainrtp.eastereggs.commandAikar.category.DeleteCategoryCommand());
-        commandManager.registerCommand(new ru.brainrtp.eastereggs.commandAikar.category.CreateCategoryCommand());
-        commandManager.registerCommand(new ru.brainrtp.eastereggs.commandAikar.action.AddActionCommand());
-        commandManager.registerCommand(new ru.brainrtp.eastereggs.commandAikar.action.RemoveActionCommand());
+        commandManager.registerCommand(new ReloadCommand());
+        commandManager.registerCommand(new TeleportCommand());
+        commandManager.registerCommand(new ListCategoryCommand());
+        commandManager.registerCommand(new EditCategoryCommand());
+        commandManager.registerCommand(new DeleteCategoryCommand());
+        commandManager.registerCommand(new CreateCategoryCommand());
+        commandManager.registerCommand(new AddActionCommand());
+        commandManager.registerCommand(new RemoveActionCommand());
+        commandManager.registerCommand(new StatsCommand());
 
         commandManager.setDefaultExceptionHandler((command, registeredCommand, sender, args, t) -> {
             getLogger().warning("Error occurred while executing command " + command.getName());

@@ -10,7 +10,6 @@ import javax.annotation.Syntax;
 
 
 @CommandAlias("eastereggs|ee")
-@Syntax("<+tag> <categor2> - something2)")
 public class EditCategoryCommand extends BaseCommand {
 
     @Dependency
