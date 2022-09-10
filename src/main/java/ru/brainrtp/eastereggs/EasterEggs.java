@@ -97,10 +97,11 @@ public class EasterEggs extends JavaPlugin implements Listener {
 
         Sentry.init(options -> {
             options.setDsn("https://acf6bda24ea74969bfd7e45542595a07@o1322226.ingest.sentry.io/6579360");
+            options.setRelease("3.2.0");
             options.setTracesSampleRate(1.0);
         });
 
-        new Metrics(this, 16399);
+        new Metrics(this, 4174);
 
         // TODO: (19.02 23:12) NPCs temporarily disabled
 //        npcBuilder = new NPCBuilder(this,
