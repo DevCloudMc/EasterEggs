@@ -1,28 +1,19 @@
 package ru.brainrtp.eastereggs.util.highlighter.blockhighlight;
 
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitRunnable;
+import ru.brainrtp.eastereggs.util.BukkitTasks;
 
 import java.util.ArrayList;
 
 public class BlockHighlightTimer {
     private final ArrayList<RunningAnimation> runningAnimations = new ArrayList<>();
 
-    private final Plugin plugin;
-
-    public BlockHighlightTimer(Plugin plugin) {
-        this.plugin = plugin;
+    public BlockHighlightTimer() {
         start();
     }
 
     public void start() {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                runningAnimations.forEach(RunningAnimation::render);
-            }
-        }.runTaskTimer(plugin, 1, 5);
+        BukkitTasks.runTaskTimer(() -> runningAnimations.forEach(RunningAnimation::render), 1, 5);
     }
 
     public RunningAnimation startAnimation(Player pl, Animation animation) {

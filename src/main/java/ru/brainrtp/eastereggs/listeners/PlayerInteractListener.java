@@ -31,7 +31,7 @@ public class PlayerInteractListener implements Listener {
 
         Player player = event.getPlayer();
 
-        if (player.getGameMode().equals(GameMode.SPECTATOR)) {
+        if (GameMode.SPECTATOR.equals(player.getGameMode())) {
             return;
         }
 
@@ -40,19 +40,15 @@ public class PlayerInteractListener implements Listener {
 
             String category = service.getEditor().getEditCategory(player.getUniqueId());
 
-            if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-                try {
-                    if (event.getHand().equals(EquipmentSlot.OFF_HAND)) {
-                        return;
-                    }
-                } catch (NoSuchMethodError e) {
-
+            if (Action.RIGHT_CLICK_BLOCK.equals(event.getAction())) {
+                if (EquipmentSlot.OFF_HAND.equals(event.getHand())) {
+                    return;
                 }
 
                 // Create block egg
                 Optional<EasterEgg> eggOpt = service.getEasterEgg(event.getClickedBlock().getLocation());
 
-                if (!eggOpt.isPresent()) {
+                if (eggOpt.isEmpty()) {
                     EggBlock egg = new EggBlock();
                     egg.setBlockLocation(event.getClickedBlock().getLocation());
                     service.createNewEgg(category, egg);
@@ -66,13 +62,9 @@ public class PlayerInteractListener implements Listener {
                 return;
             }
 
-            if (event.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
-                try {
-                    if (event.getHand().equals(EquipmentSlot.OFF_HAND)) {
-                        return;
-                    }
-                } catch (NoSuchMethodError e) {
-
+            if (Action.LEFT_CLICK_BLOCK.equals(event.getAction())) {
+                if (EquipmentSlot.OFF_HAND.equals(event.getHand())) {
+                    return;
                 }
 
                 // Remove block egg
@@ -92,13 +84,9 @@ public class PlayerInteractListener implements Listener {
         }
 
         // Activate egg
-        if (event.getAction().equals(Action.LEFT_CLICK_BLOCK) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-            try {
-                if (event.getHand().equals(EquipmentSlot.OFF_HAND)) {
-                    return;
-                }
-            } catch (NoSuchMethodError e) {
-
+        if (Action.LEFT_CLICK_BLOCK.equals(event.getAction()) || Action.RIGHT_CLICK_BLOCK.equals(event.getAction())) {
+            if (EquipmentSlot.OFF_HAND.equals(event.getHand())) {
+                return;
             }
 
             Optional<EasterEgg> egg = service.getEasterEgg(event.getClickedBlock().getLocation());

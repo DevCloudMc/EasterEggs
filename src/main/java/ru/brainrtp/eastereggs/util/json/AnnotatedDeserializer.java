@@ -1,11 +1,10 @@
 package ru.brainrtp.eastereggs.util.json;
 
+import api.logging.Logger;
 import com.google.gson.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class AnnotatedDeserializer<T> implements JsonDeserializer<T> {
 
@@ -20,8 +19,8 @@ public class AnnotatedDeserializer<T> implements JsonDeserializer<T> {
                     if (f.get(pojo) == null) {
                         throw new JsonParseException("Missing field in JSON: " + f.getName());
                     }
-                } catch (IllegalArgumentException | IllegalAccessException ex) {
-                    Logger.getLogger(AnnotatedDeserializer.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IllegalArgumentException | IllegalAccessException | JsonParseException exception) {
+                    Logger.error(exception.getMessage(), exception);
                 }
             }
         }

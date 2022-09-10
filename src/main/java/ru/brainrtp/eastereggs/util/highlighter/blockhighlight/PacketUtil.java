@@ -1,5 +1,6 @@
 package ru.brainrtp.eastereggs.util.highlighter.blockhighlight;
 
+import api.logging.Logger;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
@@ -22,8 +23,9 @@ public class PacketUtil {
 
         try {
             ProtocolLibrary.getProtocolManager().sendServerPacket(receiver, handle);
-        } catch (InvocationTargetException e) {
-            throw new RuntimeException("Unable to send the packet", e);
+        } catch (InvocationTargetException exception) {
+            Logger.error("Unable to send the packet", exception);
+            throw new RuntimeException("Unable to send the packet", exception);
         }
     }
 

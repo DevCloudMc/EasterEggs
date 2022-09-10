@@ -41,26 +41,25 @@ public class MySQL implements Database {
         dataSource.setDatabaseName(database.node("database").getString());
         dataSource.setUser(database.node("user").getString());
         dataSource.setPassword(database.node("password").getString());
-        try {
-            initDatabase();
-        } catch (IOException | SQLException e) {
-            e.printStackTrace();
-        }
+        initDatabase();
     }
 
     @Override
-    public void initDatabase() throws IOException, SQLException {
+    public void initDatabase() {
         String setup;
         try (InputStream in = plugin.getClass().getResourceAsStream("/database/createTable.sql")) {
             setup = new String(in.readAllBytes());
-        } catch (IOException e) {
-            Logger.error("Could not read db setup file. Error {0}", e);
-            throw e;
+        } catch (IOException exception) {
+            Logger.error("Could not read db setup file. Error {0}", exception, exception.getMessage());
+            throw new RuntimeException();
         }
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(setup)) {
             stmt.execute();
+        } catch (SQLException exception) {
+            Logger.error("Could not connect to db. Error: {0}", exception, exception.getMessage());
+            throw new RuntimeException(exception);
         }
         Logger.info("Database setup complete.");
     }
@@ -97,8 +96,8 @@ public class MySQL implements Database {
                 }
             }
 
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException exception) {
+            Logger.error("Could not load player data from db. Error: {0}", exception, exception.getMessage());
         }
         return playerEggs;
     }
@@ -112,8 +111,8 @@ public class MySQL implements Database {
             stmt.setString(1, easterEggCategory.getShortCategoryName());
             stmt.execute();
 
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException exception) {
+            Logger.error("Could not delete category from db. Error: {0}", exception, exception.getMessage());
         }
     }
 
@@ -129,8 +128,8 @@ public class MySQL implements Database {
             stmt.setInt(3, egg.getId());
             stmt.execute();
 
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException exception) {
+            Logger.error("Could not add player data to db. Error: {0}", exception, exception.getMessage());
         }
     }
 
@@ -145,8 +144,8 @@ public class MySQL implements Database {
             stmt.setInt(3, egg.getId());
             stmt.execute();
 
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException exception) {
+            Logger.error("Could not remove player egg from db. Error: {0}", exception, exception.getMessage());
         }
     }
 
@@ -160,8 +159,8 @@ public class MySQL implements Database {
             stmt.setString(2, easterEggCategory.getShortCategoryName());
             stmt.execute();
 
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException exception) {
+            Logger.error("Could not remove player category from db. Error: {0}", exception, exception.getMessage());
         }
 
     }
@@ -175,8 +174,8 @@ public class MySQL implements Database {
             stmt.setString(1, playerUUID.toString());
             stmt.execute();
 
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException exception) {
+            Logger.error("Could not remove full player data from db. Error: {0}", exception, exception.getMessage());
         }
 
 

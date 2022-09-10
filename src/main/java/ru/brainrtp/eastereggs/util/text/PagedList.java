@@ -1,10 +1,11 @@
 package ru.brainrtp.eastereggs.util.text;
 
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.entity.Player;
-import ru.brainrtp.eastereggs.protocol.Messages;
-import ru.brainrtp.eastereggs.protocol.text.Text;
+import ru.brainrtp.eastereggs.EasterEggs;
+import ru.brainrtp.eastereggs.configuration.Language;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,22 +20,21 @@ public class PagedList {
     private final Map<Integer, List<BaseComponent>> pages = new HashMap<>();
     private final String title;
 
-    public PagedList(String title) {
-        this.title = title;
+    public PagedList(Language language) {
+        this.title = language.getSingleMessageWithoutPrefix("egg", "list", "title");
     }
 
     public void setContent(List<BaseComponent> content) {
-        int pages = (int) Math.ceil((float) content.size() / LIMIT);
+        int pageSize = (int) Math.ceil((float) content.size() / LIMIT);
         int counter = 0;
 
-        for (int i = 1; i < pages + 1; i++) {
+        for (int currentPage = 1; currentPage < pageSize + 1; currentPage++) {
             List<BaseComponent> list = new ArrayList<>();
             list.add(new TextComponent("\n"));
 
-            for (int j = counter; j < counter + LIMIT; j++) {
+            for (int currentItem = counter; currentItem < counter + LIMIT; currentItem++) {
                 try {
-                    BaseComponent component = content.get(j);
-                    component.addExtra("\n");
+                    BaseComponent component = content.get(currentItem);
                     list.add(component);
                 } catch (IndexOutOfBoundsException e) {
                     break;
@@ -42,7 +42,7 @@ public class PagedList {
             }
 
             counter += LIMIT;
-            this.pages.put(i, list);
+            this.pages.put(currentPage, list);
         }
     }
 
@@ -55,15 +55,15 @@ public class PagedList {
     }
 
     public void openPage(int page, Player player) {
+        pages.keySet().forEach(System.out::println);
         if (pages.containsKey(page)) {
-            player.sendMessage(HEADER_LINE + " " + title + " " + "(" + page + ") " + HEADER_LINE);
-            Messages.send(player, new Text("", getAsArray(pages.get(page))));
+            player.sendMessage(String.format("%s %s (%s) %s", HEADER_LINE, title, page, HEADER_LINE));
+            ComponentBuilder append = new ComponentBuilder().append(getAsArray(pages.get(page)));
+            append.getParts().forEach(baseComponent -> player.spigot().sendMessage(baseComponent));
             player.sendMessage("");
             return;
         }
-
-        // TODO: (21.02 15:14) Add :) 
-//        player.sendMessage(EasterEggs.getLang().of("egg.list.empty"));
+        player.sendMessage(EasterEggs.getLanguage().getSingleMessage("egg", "list", "empty"));
     }
 
     private BaseComponent[] getAsArray(List<BaseComponent> list) {

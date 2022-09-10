@@ -118,8 +118,11 @@ public class EasterEggService {
         return eggs;
     }
 
-    public Collection<EasterEggCategory> getAllCategories() {
+    public Collection<EasterEggCategory> getAllCategoriesValue() {
         return categories.values();
+    }
+    public Map<String, EasterEggCategory> getAllCategories() {
+        return categories;
     }
 
     /**
@@ -164,8 +167,8 @@ public class EasterEggService {
 
             categories.get(categoryName).setConfig(config);
             categories.get(categoryName).save();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException exception) {
+            Logger.error("Unable to create category file. Error: {0}", exception, exception.getMessage());
         }
     }
 
@@ -236,7 +239,8 @@ public class EasterEggService {
             Path filePath = Paths.get(eggsPath.toString(), categoryName + ".conf");
             try {
                 Files.delete(filePath);
-            } catch (IOException e) {
+            } catch (IOException exception) {
+                Logger.error("Unable to delete category file. Error {0}", exception, exception.getMessage());
                 return false;
             }
 
@@ -281,8 +285,8 @@ public class EasterEggService {
                 category.setConfig(config);
                 categories.put(category.getShortCategoryName(), category);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception exception) {
+            Logger.error("Unable to load category file. Error: {0}", exception, exception.getMessage());
         }
 
         categories.values().forEach(category -> {

@@ -56,15 +56,12 @@ public class PlayerInteractEntityListener implements Listener {
     private boolean executeEvent(PlayerInteractEntityEvent event) {
         Player player = event.getPlayer();
         Entity target = event.getRightClicked();
-        try {
-            if (event.getHand() == EquipmentSlot.OFF_HAND) {
-                return false;
-            }
-        } catch (NoSuchMethodError e) {
 
+        if (EquipmentSlot.OFF_HAND.equals(event.getHand())) {
+            return false;
         }
 
-        if (player.getGameMode() == GameMode.SPECTATOR) {
+        if (GameMode.SPECTATOR.equals(player.getGameMode())) {
             return false;
         }
 
@@ -73,7 +70,7 @@ public class PlayerInteractEntityListener implements Listener {
             String category = service.getEditor().getEditCategory(player.getUniqueId());
             Optional<EasterEgg> eggOpt = service.getEasterEgg(target.getLocation());
 
-            if (!eggOpt.isPresent()) {
+            if (eggOpt.isEmpty()) {
                 EggEntity egg = new EggEntity();
                 egg.setEntityLocation(target.getLocation());
                 egg.setEntityType(target.getType());

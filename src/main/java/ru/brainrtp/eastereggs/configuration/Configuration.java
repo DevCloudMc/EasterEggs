@@ -1,5 +1,6 @@
 package ru.brainrtp.eastereggs.configuration;
 
+import api.logging.Logger;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Color;
@@ -95,8 +96,8 @@ public final class Configuration {
     public void load() {
         try {
             node = loader.load();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException exception) {
+            Logger.error("Unable to load file. Error: {0}", exception, exception.getMessage());
         }
     }
 
@@ -106,8 +107,8 @@ public final class Configuration {
     public void save() {
         try {
             loader.save(node);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException exception) {
+            Logger.error("Unable to save file. Error: {0}", exception, exception.getMessage());
         }
     }
 

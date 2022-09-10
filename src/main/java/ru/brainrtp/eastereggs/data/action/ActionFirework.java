@@ -1,5 +1,6 @@
 package ru.brainrtp.eastereggs.data.action;
 
+import api.logging.Logger;
 import io.leangen.geantyref.TypeToken;
 import lombok.Data;
 import org.bukkit.FireworkEffect;
@@ -89,8 +90,8 @@ public class ActionFirework implements Action {
                 try {
                     FireworkEffect checkpoint = configurationNode.get(FireworkEffect.class);
                     result.add(checkpoint);
-                } catch (SerializationException e) {
-                    e.printStackTrace();
+                } catch (SerializationException exception) {
+                    Logger.error("Unable to serialization firework effects. Error {0}", exception, exception.getMessage());
                 }
             }
             return result;
