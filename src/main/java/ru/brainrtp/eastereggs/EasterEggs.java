@@ -3,9 +3,19 @@ package ru.brainrtp.eastereggs;
 
 import api.logging.Logger;
 import api.logging.handlers.JULHandler;
+import co.aikar.commands.BukkitCommandIssuer;
+import co.aikar.commands.ConditionFailedException;
+import co.aikar.commands.Locales;
+import co.aikar.commands.PaperCommandManager;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import io.sentry.Sentry;
 import lombok.Getter;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -19,39 +29,38 @@ import org.bukkit.plugin.java.annotation.dependency.Library;
 import org.bukkit.plugin.java.annotation.dependency.SoftDependency;
 import org.bukkit.plugin.java.annotation.plugin.ApiVersion;
 import org.bukkit.plugin.java.annotation.plugin.author.Author;
-import ru.brainrtp.eastereggs.commands.MainCommand;
-import ru.brainrtp.eastereggs.commands.main.*;
-import ru.brainrtp.eastereggs.commands.main.action.ActionCommand;
-import ru.brainrtp.eastereggs.commands.main.action.AddActionCommand;
-import ru.brainrtp.eastereggs.commands.main.action.RemoveActionCommand;
-import ru.brainrtp.eastereggs.commands.main.category.CategoryCommand;
-import ru.brainrtp.eastereggs.commands.main.category.CreateCategoryCommand;
-import ru.brainrtp.eastereggs.commands.main.category.DeleteCategoryCommand;
+import ru.brainrtp.eastereggs.commandAikar.HelpCommand;
 import ru.brainrtp.eastereggs.configuration.Configuration;
 import ru.brainrtp.eastereggs.configuration.Language;
+import ru.brainrtp.eastereggs.data.EasterEggCategory;
 import ru.brainrtp.eastereggs.data.placeholders.EggsPlaceholder;
 import ru.brainrtp.eastereggs.listeners.*;
+import ru.brainrtp.eastereggs.providers.TokensProvider;
 import ru.brainrtp.eastereggs.serializer.ActionSerializer;
 import ru.brainrtp.eastereggs.services.EasterEggService;
 import ru.brainrtp.eastereggs.storage.database.Database;
 import ru.brainrtp.eastereggs.storage.database.MySQL;
+import ru.brainrtp.eastereggs.util.BukkitTasks;
 import ru.brainrtp.eastereggs.util.highlighter.blockhighlight.BlockHighlightTimer;
 import ru.brainrtp.eastereggs.util.highlighter.blockhighlight.Util;
+import ru.brainrtp.eastereggs.util.json.AnnotatedDeserializer;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Map;
 
-@org.bukkit.plugin.java.annotation.plugin.Plugin(name = "EasterEggs", version = "3.0")
+@org.bukkit.plugin.java.annotation.plugin.Plugin(name = "EasterEggs", version = "3.2.0")
 @Dependency("ProtocolLib")
 @Dependency("Vault")
 @Dependency("GlowAPI")
 @Dependency("PacketListenerApi")
 @SoftDependency("PlaceholderAPI")
 @Author("BrainRTP")
-@Libraries({@Library("org.spongepowered:configurate-hocon:4.1.1")})
+@Libraries({@Library("org.spongepowered:configurate-hocon:4.1.2"), @Library("io.sentry:sentry:6.2.1")})
 @Commands(@Command(name = "eastereggs", desc = "EasterEggs command", aliases = {"ee"}))
-@ApiVersion(ApiVersion.Target.v1_18)
+@ApiVersion(ApiVersion.Target.v1_19)
 public class EasterEggs extends JavaPlugin implements Listener {
 
     private Configuration mainConfig;
@@ -69,11 +78,20 @@ public class EasterEggs extends JavaPlugin implements Listener {
     @Getter
     private static BlockHighlightTimer blockHighlightTimer;
 
+    private PaperCommandManager commandManager;
+    private Gson gson;
+
     @Override
     public void onEnable() {
         plugin = this;
         Logger.init(new JULHandler(getLogger()));
         Logger.info("Starting...");
+
+        Sentry.init(options -> {
+            options.setDsn("https://acf6bda24ea74969bfd7e45542595a07@o1322226.ingest.sentry.io/6579360");
+            options.setTracesSampleRate(1.0);
+        });
+
         // TODO: (19.02 23:12) NPCs temporarily disabled
 //        npcBuilder = new NPCBuilder(this,
 //                NPCPool.builder(this)
@@ -86,16 +104,19 @@ public class EasterEggs extends JavaPlugin implements Listener {
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //        }
+        BukkitTasks.setPlugin(this);
+        registerGsonAdapter();
         pluginDataFolder = this.getDataFolder().toPath();
-        blockHighlightTimer = new BlockHighlightTimer(this);
+        blockHighlightTimer = new BlockHighlightTimer();
 
         this.getServer().getPluginManager().registerEvents(this, this);
         try {
             mainConfig = new Configuration("config.conf", this.getDataFolder().toPath(), this);
             String languageFile = "lang_" + mainConfig.get().node("languageFile").getString();
             language = new Language(languageFile, this.getDataFolder().toPath(), this);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException exception) {
+            Logger.error("Can't loading configurations. Disable plugin. Error message: {0}", exception, exception.getMessage());
+            getServer().getPluginManager().disablePlugin(this);
         }
 
         ActionSerializer.init();
@@ -103,20 +124,19 @@ public class EasterEggs extends JavaPlugin implements Listener {
 
         try {
             eggService = new EasterEggService(this, language, database);
-        } catch (IOException e) {
-            Logger.error("Cant initialize EasterEgg service. Disable plugin");
-            e.printStackTrace();
+        } catch (IOException exception) {
+            Logger.error("Can't initialize EasterEgg service. Disable plugin. Error message: {0}", exception, exception.getMessage());
             getServer().getPluginManager().disablePlugin(this);
         }
         registerListeners();
-        registerCommands();
+        registerAikarCommands();
         registerServices();
 
         eggService.reloadAllEggs();
         try {
             database.testDataSource();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException exception) {
+            Logger.error(exception.getMessage(), exception);
         }
     }
 
@@ -134,9 +154,9 @@ public class EasterEggs extends JavaPlugin implements Listener {
 
         if (getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             new EggsPlaceholder().register();
-            getLogger().info("PlaceholderAPI enabled, registered our placeholders");
+            Logger.info("PlaceholderAPI enabled, registered our placeholders");
         } else {
-            getLogger().info("PlaceholderAPI disabled, placeholders not registered");
+            Logger.info("PlaceholderAPI disabled, placeholders not registered");
         }
     }
 
@@ -149,27 +169,101 @@ public class EasterEggs extends JavaPlugin implements Listener {
 
     }
 
-    private void registerCommands() {
-        ru.brainrtp.eastereggs.commands.Command ee = new MainCommand("ee.admin", language)
-//                .addSub("reload", new ReloadCommand(language, timer, npcService))
-                // TODO: (19.02 22:44) Kludge, because params - static)
-                .addSub("clear", new ClearPlayerDataCommand(language, eggService))
-                .addSub("reload", new ReloadCommand(language, mainConfig))
-                .addSub("edit", new EditCategoryCommand(language, eggService))
-                .addSub("tp", new TeleportCommand(language, eggService, plugin))
-                .addSub("action",
-                        new ActionCommand()
-                                .addSub("add", new AddActionCommand(language, eggService))
-                                .addSub("remove", new RemoveActionCommand(language, eggService))
-                )
-                .addSub("category",
-                        new CategoryCommand()
-                                .addSub("create", new CreateCategoryCommand(language, eggService))
-                                .addSub("delete", new DeleteCategoryCommand(language, eggService))
-                )
-                .addSub("list", new ListCategoryCommand(language, eggService));
+    private void registerAikarCommands() {
 
-        getServer().getPluginCommand("ee").setExecutor(ee);
+        commandManager = new PaperCommandManager(this);
+
+        commandManager.getLocales().addMessageStrings(Locales.ENGLISH, Map.of("acf-core.error_prefix", "{message}"));
+        commandManager.getLocales().addMessageStrings(Locales.ENGLISH, Map.of("acf-core.invalid_syntax", "<c2>{command}</c2> <c3>{syntax}</c3>"));
+        commandManager.enableUnstableAPI("help");
+
+        commandManager.getCommandCompletions().registerCompletion("playerList", c -> {
+            CommandSender sender = c.getSender();
+            if (sender.hasPermission("eastereggs.admin")) {
+                return Arrays.stream(Bukkit.getOfflinePlayers()).map(OfflinePlayer::getName).toList();
+            }
+            return null;
+        });
+        commandManager.getCommandCompletions().registerCompletion("categoryList", c -> {
+            CommandSender sender = c.getSender();
+            if (sender.hasPermission("eastereggs.admin")) {
+                return eggService.getAllCategoriesValue().stream()
+                        .map(EasterEggCategory::getShortCategoryName)
+                        .toList();
+            }
+            return null;
+        });
+        commandManager.getCommandCompletions().registerCompletion("actionList", c -> {
+            CommandSender sender = c.getSender();
+            if (sender.hasPermission("eastereggs.admin")) {
+                return TokensProvider.getActionTokens().keySet().stream().toList();
+            }
+            return null;
+        });
+
+        commandManager.getCommandConditions().addCondition(String.class, "action", (c, exec, actionName) -> {
+            if (actionName == null) {
+                return;
+            }
+            if (!TokensProvider.getActionTokens().containsKey(actionName)) {
+                throw new ConditionFailedException(language.getSingleMessage("action", "not_exist"));
+            }
+        });
+
+        // check if category not exist or drop error
+        commandManager.getCommandConditions().addCondition(String.class, "categoryNotExist", (c, exec, categoryName) -> {
+            if (eggService.getAllCategories().containsKey(categoryName)) {
+                throw new ConditionFailedException(language.getSingleMessage("category", "create", "taken"));
+            }
+        });
+
+        commandManager.getCommandConditions().addCondition(String.class, "categoryExist", (c, exec, categoryName) -> {
+            if (!eggService.getAllCategories().containsKey(categoryName)) {
+                throw new ConditionFailedException(language.getSingleMessage("category", "not_exist"));
+            }
+        });
+
+        commandManager.getCommandConditions().addCondition("editMode", (context) -> {
+            BukkitCommandIssuer issuer = context.getIssuer();
+            if (issuer.isPlayer()) {
+                Player player = issuer.getPlayer();
+                if (!eggService.getEditor().isEditMode(player.getUniqueId())) {
+                    throw new ConditionFailedException(language.getSingleMessage("edit", "not_edit"));
+                }
+            }
+        });
+
+        commandManager.registerDependency(Language.class, language);
+        commandManager.registerDependency(EasterEggService.class, eggService);
+        commandManager.registerDependency(Gson.class, gson);
+
+        commandManager.registerCommand(new HelpCommand());
+        commandManager.registerCommand(new ru.brainrtp.eastereggs.commandAikar.ReloadCommand());
+        commandManager.registerCommand(new ru.brainrtp.eastereggs.commandAikar.TeleportCommand());
+        commandManager.registerCommand(new ru.brainrtp.eastereggs.commandAikar.ListCategoryCommand());
+        commandManager.registerCommand(new ru.brainrtp.eastereggs.commandAikar.EditCategoryCommand());
+        commandManager.registerCommand(new ru.brainrtp.eastereggs.commandAikar.category.DeleteCategoryCommand());
+        commandManager.registerCommand(new ru.brainrtp.eastereggs.commandAikar.category.CreateCategoryCommand());
+        commandManager.registerCommand(new ru.brainrtp.eastereggs.commandAikar.action.AddActionCommand());
+        commandManager.registerCommand(new ru.brainrtp.eastereggs.commandAikar.action.RemoveActionCommand());
+
+        commandManager.setDefaultExceptionHandler((command, registeredCommand, sender, args, t) -> {
+            getLogger().warning("Error occurred while executing command " + command.getName());
+            return true;
+        });
+    }
+
+    private void registerGsonAdapter() {
+        GsonBuilder builder = new GsonBuilder();
+
+        TokensProvider.getActionTokens().forEach((s, typeToken) ->
+                builder.registerTypeAdapter(typeToken.getType(), getDeserializer(typeToken.getType())));
+
+        gson = builder.create();
+    }
+
+    private <T> AnnotatedDeserializer<T> getDeserializer(T type) {
+        return new AnnotatedDeserializer<T>();
     }
 
     @Override
@@ -179,5 +273,17 @@ public class EasterEggs extends JavaPlugin implements Listener {
             if (eggService.getEditor().isEditMode(player.getUniqueId()))
                 eggService.stopEditCategory(player);
         });
+    }
+
+    public void reload() {
+
+        try {
+            eggService.reloadAllEggs();
+            language.reload();
+            mainConfig.load();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Logger.error("Error while reloading plugin: {0}", e, e.getMessage());
+        }
     }
 }
