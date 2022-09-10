@@ -7,6 +7,7 @@ import ru.brainrtp.eastereggs.util.text.Colors;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 
 public class Language {
@@ -23,11 +24,15 @@ public class Language {
     }
 
     public String getSingleMessage(Object... key) {
-        return Colors.of(prefix + configuration.get().node(key).getString("&cMissing language key - &e" + key));
+        return Colors.of(prefix + configuration.get().node(key).getString("&cMissing language key - &e" + Arrays.toString(key)));
     }
 
     public String getSingleMessageWithoutPrefix(Object... key) {
-        return Colors.of(configuration.get().node(key).getString("&cMissing language key - &e" + key));
+        return Colors.of(configuration.get().node(key).getString("&cMissing language key - &e" + Arrays.toString(key)));
+    }
+
+    public void reload(){
+        configuration.load();
     }
 
 
