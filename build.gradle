@@ -1,10 +1,13 @@
 plugins {
     id 'java'
-    id 'com.github.johnrengelman.shadow' version '7.0.0'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 group 'ru.brainrtp'
 version '3.0'
+
+// without "/" on the end
+def serverDir = "/Users/mac/Desktop/spigat/plugins"
 
 repositories {
     maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
@@ -13,6 +16,7 @@ repositories {
     maven { url 'https://repo.dmulloy2.net/repository/public/' }
     maven { url 'https://libraries.minecraft.net/' }
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+    maven { url 'https://repo.aikar.co/content/groups/aikar/' }
     mavenCentral()
     mavenLocal()
 }
@@ -20,11 +24,13 @@ repositories {
 dependencies {
     // local
     compileOnly 'org.spigot:spigot:1.17.1'
-
     compileOnly fileTree(dir: 'libs', include: '*.jar')
 
-    compileOnly 'org.projectlombok:lombok:1.18.22'
-    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+    implementation 'io.sentry:sentry:6.4.1'
+    implementation "co.aikar:acf-paper:0.5.1-SNAPSHOT"
+
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
     compileOnly 'org.spongepowered:configurate-hocon:4.1.2'
 //    implementation 'ru.progrm-jarvis.minecraft:fake-entity-lib:1.0.0-SNAPSHOT'
 
@@ -37,34 +43,93 @@ dependencies {
     compileOnly 'org.spigotmc:plugin-annotations:1.2.3-SNAPSHOT'
     annotationProcessor 'org.spigotmc:plugin-annotations:1.2.3-SNAPSHOT'
 
-    compileOnly 'me.clip:placeholderapi:2.10.10'
+    compileOnly 'me.clip:placeholderapi:2.11.2'
 
     compileOnly 'com.github.MilkBowl:VaultAPI:1.7.1'
 
-    compileOnly 'com.comphenix.protocol:ProtocolLib:4.7.0'
+    compileOnly 'com.comphenix.protocol:ProtocolLib:4.8.0'
+}
+
+compileJava {
+    options.compilerArgs += ["-parameters"]
+    options.fork = true
+    options.forkOptions.executable = 'javac'
+}
+
+def getIncrementVersion() {
+    def versionPropsFile = file('version.properties')
+
+    if (versionPropsFile.canRead()) {
+        Properties versionProps = new Properties()
+
+        versionProps.load(new FileInputStream(versionPropsFile))
+        def major = versionProps['VERSION_MAJOR']
+        def minor = versionProps['VERSION_MINOR']
+        def patch = versionProps['VERSION_PATCH'].toInteger() + 1
+        def version = major + "." + minor + "." + patch
+
+        versionProps['VERSION_PATCH'] = patch.toString()
+        versionProps.store(versionPropsFile.newWriter(), null)
+
+        println sprintf("Building version: " + version)
+        return version
+
+    } else {
+        throw new GradleException("Could not read version.properties!")
+    }
+}
+
+def getDecrementVersion() {
+    def versionPropsFile = file('version.properties')
+
+    if (versionPropsFile.canRead()) {
+        Properties versionProps = new Properties()
+
+        versionProps.load(new FileInputStream(versionPropsFile))
+        def major = versionProps['VERSION_MAJOR']
+        def minor = versionProps['VERSION_MINOR']
+        def patch = versionProps['VERSION_PATCH'].toInteger() - 1
+        def version = major + "." + minor + "." + patch
+
+        versionProps.store(versionPropsFile.newWriter(), null)
+
+        return version
+
+    } else {
+        throw new GradleException("Could not read version.properties!")
+    }
+}
+
+shadowJar {
+    minimize()
+    relocate 'co.aikar.commands', 'ru.brainrtp.jobs.acf'
+    relocate 'co.aikar.locales', 'ru.brainrtp.jobs.locales'
+    def version = getIncrementVersion()
+    rootProject.version = version
+}
+
+task buildAndCopyJar {
+    dependsOn(compileJava)
+    dependsOn(tasks.jar)
+    dependsOn(test)
+    dependsOn(shadowJar)
+    def previousVersion = getDecrementVersion()
+
+    doLast {
+        copy {
+            from "$projectDir/build/libs/$rootProject.name-$rootProject.version-all.jar"
+            into "$serverDir"
+        }
+        delete "$serverDir/$rootProject.name-$previousVersion-all.jar"
+        delete "$projectDir/build/libs/$rootProject.name-$previousVersion-all.jar"
+        delete "$projectDir/build/libs/$rootProject.name-${previousVersion}.jar"
+    }
 }
 
 test {
     useJUnitPlatform()
-}
 
-
-task copyJar {
-    doLast {
-        copy {
-            from "$projectDir/build/libs/EasterEggs-3.0.jar"
-            into '/Users/mac/Desktop/spigat/plugins/'
-        }
-    }
-}
-
-task buildAndCopyJar {
-    dependsOn(tasks.jar)
-    dependsOn(shadowJar)
-    doLast {
-        copy {
-            from "$projectDir/build/libs/EasterEggs-3.0-all.jar"
-            into '/Users/mac/Desktop/spigat/plugins/'
-        }
+    afterTest { desc, result ->
+        logger.quiet "Executing test '${desc.displayName}' [${desc.name}] with result: ${result.resultType}"
     }
 }
