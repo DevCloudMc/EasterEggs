@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'com.diffplug.spotless' version '8.11.0'
 }
 
 group = 'ru.brainrtp'
@@ -42,5 +43,11 @@ dependencies {
 processResources {
     filesMatching('plugin.yml') {
         expand(version: project.version)
+    }
+}
+
+spotless {
+    java {
+        googleJavaFormat('2.0.0')
     }
 }
