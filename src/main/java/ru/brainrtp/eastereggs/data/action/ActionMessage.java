@@ -1,12 +1,9 @@
 package ru.brainrtp.eastereggs.data.action;
 
-import api.logging.Logger;
 import java.lang.reflect.Type;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.Data;
 import net.kyori.adventure.title.Title;
 import org.bukkit.entity.Player;
@@ -14,6 +11,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
+import ru.brainrtp.eastereggs.EasterEggs;
+import ru.brainrtp.eastereggs.configuration.Configuration;
 import ru.brainrtp.eastereggs.util.text.Colors;
 
 @Data
@@ -136,19 +135,19 @@ public class ActionMessage implements Action {
 
     private void paramMustBeAnInteger(ConfigurationNode node, String param) {
       if (!(node.node(param).raw() instanceof Integer)) {
-        String pathToWarn =
-            Arrays.stream(node.path().array())
-                .map(Object::toString)
-                .collect(Collectors.joining("."))
-                .concat(".");
-
         String logMessage =
             """
-            &fThe &e''{0}''&r parameter must be an integer. Right now value is - &e''{1}''. &r
+            &fThe &e'{}'&r parameter must be an integer. Right now value is - &e'{}'. &r
             Setting the default value to &e0&r
-            Full path to this param - &e{2}&r\
+            Full path to this param - &e{}&r\
             """;
-        Logger.warn(Colors.of(logMessage), param, node.node(param).raw(), pathToWarn + param);
+        EasterEggs.getPlugin()
+            .getSLF4JLogger()
+            .warn(
+                Colors.of(logMessage),
+                param,
+                node.node(param).raw(),
+                Configuration.path(node) + "." + param);
       }
     }
   }

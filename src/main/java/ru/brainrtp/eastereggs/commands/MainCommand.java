@@ -2,10 +2,11 @@ package ru.brainrtp.eastereggs.commands;
 
 import java.util.List;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import ru.brainrtp.eastereggs.configuration.Language;
 
-public class MainCommand extends Command {
+public class MainCommand extends Command implements TabCompleter {
 
   private final Language language;
 

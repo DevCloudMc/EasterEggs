@@ -1,6 +1,5 @@
 package ru.brainrtp.eastereggs.data.action;
 
-import api.logging.Logger;
 import io.leangen.geantyref.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -12,10 +11,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
+import ru.brainrtp.eastereggs.EasterEggs;
 import ru.brainrtp.eastereggs.providers.TokensProvider;
 
 @Data
-public class Actions implements Action {
+public class Actions {
 
   private final List<Action> localActions = new ArrayList<>();
 
@@ -31,18 +31,14 @@ public class Actions implements Action {
     removeAction.ifPresent(localActions::remove);
   }
 
-  @Override
-  public String getActionTitle() {
-    return null;
-  }
-
-  @Override
   public void activate(Player player) {
     for (Action action : localActions) {
       try {
         action.activate(player);
       } catch (Exception e) {
-        Logger.error("Egg action failed, the next actions still run", e);
+        EasterEggs.getPlugin()
+            .getSLF4JLogger()
+            .error("Egg action failed, the next actions still run", e);
       }
     }
   }
@@ -58,7 +54,9 @@ public class Actions implements Action {
         TypeToken<? extends Action> typeToken =
             TokensProvider.getActionType(String.valueOf(value.key()));
         if (typeToken == null) {
-          Logger.warn("Unknown action {0} skipped, path {1}", value.key(), value.path());
+          EasterEggs.getPlugin()
+              .getSLF4JLogger()
+              .warn("Unknown action {} skipped, path {}", value.key(), value.path());
           continue;
         }
         actions.addAction(value.get(typeToken));

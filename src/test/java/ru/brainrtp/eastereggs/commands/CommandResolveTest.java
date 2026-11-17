@@ -3,7 +3,6 @@ package ru.brainrtp.eastereggs.commands;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-import java.util.List;
 import org.bukkit.command.CommandSender;
 import org.junit.jupiter.api.Test;
 
@@ -12,12 +11,6 @@ class CommandResolveTest {
   private static class Stub extends Command {
     @Override
     public void execute(CommandSender sender, String[] args) {}
-
-    @Override
-    public List<String> onTabComplete(
-        CommandSender sender, org.bukkit.command.Command cmd, String label, String[] args) {
-      return null;
-    }
   }
 
   @Test

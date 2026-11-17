@@ -5,7 +5,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import ru.brainrtp.eastereggs.commands.Command;
 import ru.brainrtp.eastereggs.configuration.Language;
-import ru.brainrtp.eastereggs.data.EasterEggCategory;
 import ru.brainrtp.eastereggs.services.EasterEggService;
 import ru.brainrtp.eastereggs.util.text.Colors;
 
@@ -45,15 +44,7 @@ public class EditCategoryCommand extends Command {
   @Override
   public List<String> getTabComplete(String[] args) {
     if (args.length == 2) {
-      return eggService.getAllCategories().stream()
-          .map(EasterEggCategory::getShortCategoryName)
-          .toList();
+      return eggService.getCategoryNames();
     } else return null;
-  }
-
-  @Override
-  public List<String> onTabComplete(
-      CommandSender commandSender, org.bukkit.command.Command command, String s, String[] strings) {
-    return null;
   }
 }

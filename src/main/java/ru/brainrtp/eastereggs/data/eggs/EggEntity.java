@@ -1,11 +1,7 @@
 package ru.brainrtp.eastereggs.data.eggs;
 
-import api.logging.Logger;
-import io.leangen.geantyref.TypeToken;
 import java.lang.reflect.Type;
-import java.util.Arrays;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.bukkit.Location;
@@ -15,8 +11,6 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
 import ru.brainrtp.eastereggs.data.EggTypes;
 import ru.brainrtp.eastereggs.data.NamedLocation;
-import ru.brainrtp.eastereggs.data.action.Actions;
-import ru.brainrtp.eastereggs.util.text.Colors;
 
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 @Data
@@ -24,10 +18,6 @@ public class EggEntity extends EasterEgg {
 
   private UUID entityUUID;
 
-  private static final String ID_NODE = "id";
-  private static final String TYPE_NODE = "type";
-  private static final String LOCATION_NODE = "location";
-  private static final String ACTIONS_NODE = "actions";
   private static final String ENTITY_UUID_NODE = "entityUUID";
 
   public EggEntity() {
@@ -43,12 +33,7 @@ public class EggEntity extends EasterEgg {
     @Override
     public EggEntity deserialize(Type type, ConfigurationNode node) throws SerializationException {
       EggEntity eggEntity = new EggEntity();
-      paramMustBeExist(node, ID_NODE);
-      eggEntity.setId(node.node(ID_NODE).getInt());
-
-      eggEntity.setLocation(node.node(LOCATION_NODE).require(NamedLocation.class));
-
-      eggEntity.setActions(node.node(ACTIONS_NODE).get(Actions.class));
+      deserializeCommon(eggEntity, node);
       eggEntity.setEntityUUID(UUID.fromString(node.node(ENTITY_UUID_NODE).getString()));
       return eggEntity;
     }
@@ -56,29 +41,8 @@ public class EggEntity extends EasterEgg {
     @Override
     public void serialize(Type type, @Nullable EggEntity eggEntity, ConfigurationNode node)
         throws SerializationException {
-      // TODO: (21.02 15:10) Add additional checks
-      node.node(ID_NODE).set(eggEntity.getId());
-      node.node(TYPE_NODE).set(eggEntity.getType().toString());
-      node.node(LOCATION_NODE).set(NamedLocation.class, eggEntity.getLocation());
-      node.node(ACTIONS_NODE).set(TypeToken.get(Actions.class), eggEntity.getActions());
+      serializeCommon(eggEntity, node);
       node.node(ENTITY_UUID_NODE).set(eggEntity.getEntityUUID().toString());
-    }
-
-    private void paramMustBeExist(ConfigurationNode node, String param) {
-      if (node.node(param).isNull()) {
-        String pathToWarn =
-            Arrays.stream(node.path().array())
-                .map(Object::toString)
-                .collect(Collectors.joining("."))
-                .concat(".");
-
-        String logMessage =
-            """
-            &fThe &e''{0}''&r parameter must be exist.
-            Full path to this param - &e{1}&r\
-            """;
-        Logger.warn(Colors.of(logMessage), param, pathToWarn + param);
-      }
     }
   }
 }

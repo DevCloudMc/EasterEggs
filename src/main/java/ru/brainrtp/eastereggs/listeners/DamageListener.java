@@ -10,17 +10,14 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import ru.brainrtp.eastereggs.EasterEggs;
-import ru.brainrtp.eastereggs.configuration.Language;
 import ru.brainrtp.eastereggs.data.eggs.EasterEgg;
 import ru.brainrtp.eastereggs.services.EasterEggService;
 
 public class DamageListener implements Listener {
 
-  private final Language language;
   private final EasterEggService service;
 
   public DamageListener() {
-    language = EasterEggs.getLanguage();
     service = EasterEggs.getEggService();
   }
 
@@ -51,45 +48,15 @@ public class DamageListener implements Listener {
   }
 
   private boolean execute(Entity damager, Entity target) {
-    if (damager instanceof Player) {
-      Player player = (Player) damager;
-
-      if (player.getGameMode().equals(GameMode.SPECTATOR)) {
-        return false;
-      }
-
-      if (service.getEditor().isEditMode(player.getUniqueId())) {
-        // Delete egg
-        String category = service.getEditor().getEditCategory(player.getUniqueId());
-        Optional<EasterEgg> egg =
-            service.getEasterEgg(target).filter(e -> e.getCategory().equals(category));
-
-        if (egg.isPresent()) {
-          service.deleteEgg(category, egg.get());
-          player.sendMessage(
-              language
-                  .getSingleMessage("egg", "delete", "success")
-                  .replace("{egg}", String.valueOf(egg.get().getId()))
-                  .replace("{category}", egg.get().getCategory()));
-        }
-
-        return true;
-      }
-
-      // Activate egg
-      Optional<EasterEgg> egg = service.getEasterEgg(target);
-
-      if (egg.isPresent()) {
-        if (!service.getPlayerService().isCompletedEgg(player.getUniqueId(), egg.get())) {
-          egg.get().activate(player);
-          return true;
-        }
-
-        player.sendMessage(language.getSingleMessage("egg", "find", "already"));
-        return true;
-      }
+    if (!(damager instanceof Player player) || player.getGameMode().equals(GameMode.SPECTATOR)) {
+      return false;
     }
 
-    return false;
+    Optional<EasterEgg> egg = service.getEasterEgg(target);
+    if (service.getEditor().isEditMode(player.getUniqueId())) {
+      service.deleteEggAt(player, egg);
+      return true;
+    }
+    return service.findEgg(player, egg);
   }
 }

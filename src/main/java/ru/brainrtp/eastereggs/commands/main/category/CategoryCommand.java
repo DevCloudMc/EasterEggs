@@ -20,10 +20,4 @@ public class CategoryCommand extends Command {
   public void execute(CommandSender sender, String[] args) {
     sender.sendMessage(getUsage());
   }
-
-  @Override
-  public List<String> onTabComplete(
-      CommandSender commandSender, org.bukkit.command.Command command, String s, String[] strings) {
-    return null;
-  }
 }

@@ -3,12 +3,15 @@ package ru.brainrtp.eastereggs.configuration;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.plugin.Plugin;
 import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.serialize.TypeSerializerCollection;
@@ -101,6 +104,12 @@ public final class Configuration {
 
   public CommentedConfigurationNode get() {
     return this.node;
+  }
+
+  public static String path(ConfigurationNode node) {
+    return Arrays.stream(node.path().array())
+        .map(Object::toString)
+        .collect(Collectors.joining("."));
   }
 
   public static TypeSerializerCollection getSerializers() {

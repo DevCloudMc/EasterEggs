@@ -1,43 +1,25 @@
 package ru.brainrtp.eastereggs.util.text;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import org.bukkit.entity.Player;
 import ru.brainrtp.eastereggs.EasterEggs;
 
-public class PagedList {
+public final class PagedList {
 
   private static final String HEADER_LINE = "===============";
   private static final int LIMIT = 10;
 
-  private final Map<Integer, List<Component>> pages = new HashMap<>();
-  private final String title;
+  private PagedList() {}
 
-  public PagedList(String title) {
-    this.title = title;
-  }
-
-  public void setContent(List<Component> content) {
-    for (int i = 0; i * LIMIT < content.size(); i++) {
-      pages.put(i + 1, content.subList(i * LIMIT, Math.min(content.size(), (i + 1) * LIMIT)));
-    }
-  }
-
-  public int getPagesCount() {
-    return pages.size();
-  }
-
-  public List<Component> getPage(int page) {
-    return pages.get(page);
-  }
-
-  public void openPage(int page, Player player) {
-    if (pages.containsKey(page)) {
+  public static void open(Player player, String title, List<Component> content, int page) {
+    long from = (long) (page - 1) * LIMIT;
+    if (page >= 1 && from < content.size()) {
+      List<Component> lines =
+          content.subList((int) from, (int) Math.min(content.size(), from + LIMIT));
       player.sendMessage(HEADER_LINE + " " + title + " " + "(" + page + ") " + HEADER_LINE);
-      player.sendMessage(Component.join(JoinConfiguration.newlines(), pages.get(page)));
+      player.sendMessage(Component.join(JoinConfiguration.newlines(), lines));
       player.sendMessage("");
       return;
     }

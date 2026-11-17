@@ -1,7 +1,5 @@
 package ru.brainrtp.eastereggs.commands.main;
 
-import api.logging.Logger;
-import java.util.List;
 import org.bukkit.command.CommandSender;
 import ru.brainrtp.eastereggs.EasterEggs;
 import ru.brainrtp.eastereggs.commands.Command;
@@ -26,17 +24,12 @@ public class ReloadCommand extends Command {
       EasterEggs.getEggService().getEditor().endAllSessions();
       EasterEggs.getEggService().reloadAllEggs();
     } catch (Exception e) {
-      e.printStackTrace();
-      Logger.error("Error while reloading plugin: " + e.getMessage());
+      EasterEggs.getPlugin()
+          .getSLF4JLogger()
+          .error("Error while reloading plugin: {}", e.getMessage(), e);
       sender.sendMessage(language.getSingleMessage("reload", "failed"));
       return;
     }
     sender.sendMessage(language.getSingleMessage("reload", "success"));
-  }
-
-  @Override
-  public List<String> onTabComplete(
-      CommandSender commandSender, org.bukkit.command.Command command, String s, String[] strings) {
-    return null;
   }
 }

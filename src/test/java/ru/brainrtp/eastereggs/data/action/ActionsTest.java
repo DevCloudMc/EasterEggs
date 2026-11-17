@@ -2,18 +2,17 @@ package ru.brainrtp.eastereggs.data.action;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import api.logging.Logger;
-import api.logging.handlers.JULHandler;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.entity.Player;
 import org.junit.jupiter.api.Test;
+import ru.brainrtp.eastereggs.TestPlugin;
 
 class ActionsTest {
 
   @Test
-  void failingActionDoesNotStopTheNextOne() {
-    Logger.init(new JULHandler(java.util.logging.Logger.getLogger("test")));
+  void failingActionDoesNotStopTheNextOne() throws Exception {
+    TestPlugin.install();
     List<String> ran = new ArrayList<>();
     Actions actions = new Actions();
     actions.addAction(

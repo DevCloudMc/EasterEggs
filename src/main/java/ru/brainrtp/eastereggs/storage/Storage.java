@@ -49,6 +49,8 @@ public final class Storage implements AutoCloseable {
                 + database.node("database").getString("eastereggs"));
         config.setUsername(database.node("user").getString());
         config.setPassword(database.node("password").getString());
+        // seconds: a hung query must not hold the single storage thread forever
+        config.addDataSourceProperty("socketTimeout", 30);
       }
       default ->
           throw new IllegalArgumentException(

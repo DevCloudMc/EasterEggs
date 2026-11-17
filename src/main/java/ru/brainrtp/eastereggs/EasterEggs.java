@@ -1,7 +1,5 @@
 package ru.brainrtp.eastereggs;
 
-import api.logging.Logger;
-import api.logging.handlers.JULHandler;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -20,7 +18,6 @@ import ru.brainrtp.eastereggs.configuration.Configuration;
 import ru.brainrtp.eastereggs.configuration.Language;
 import ru.brainrtp.eastereggs.data.placeholders.EggsPlaceholder;
 import ru.brainrtp.eastereggs.listeners.*;
-import ru.brainrtp.eastereggs.serializer.ActionSerializer;
 import ru.brainrtp.eastereggs.services.EasterEggService;
 import ru.brainrtp.eastereggs.services.PlayerEggsService;
 import ru.brainrtp.eastereggs.storage.Storage;
@@ -37,15 +34,13 @@ public class EasterEggs extends JavaPlugin {
   @Override
   public void onEnable() {
     plugin = this;
-    Logger.init(new JULHandler(getLogger()));
-    Logger.info("Starting...");
+    getSLF4JLogger().info("Starting...");
 
     try {
       mainConfig = new Configuration("config.conf", this.getDataFolder().toPath(), this);
       String languageFile = "lang_" + mainConfig.get().node("languageFile").getString();
       language = new Language(languageFile, this.getDataFolder().toPath(), this);
 
-      ActionSerializer.init();
       playerEggs =
           new PlayerEggsService(
               Storage.open(mainConfig.get().node("database"), getDataFolder().toPath()),
@@ -63,7 +58,7 @@ public class EasterEggs extends JavaPlugin {
         playerEggs.loadPlayerData(player.getUniqueId());
       }
     } catch (Exception e) {
-      Logger.error("Could not start: {0}. Disabling the plugin", e, e.getMessage());
+      getSLF4JLogger().error("Could not start: {}. Disabling the plugin", e.getMessage(), e);
       getServer().getPluginManager().disablePlugin(this);
       return;
     }
@@ -80,9 +75,9 @@ public class EasterEggs extends JavaPlugin {
     if (getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
       placeholder = new EggsPlaceholder();
       placeholder.register();
-      getLogger().info("PlaceholderAPI enabled, registered our placeholders");
+      getSLF4JLogger().info("PlaceholderAPI enabled, registered our placeholders");
     } else {
-      getLogger().info("PlaceholderAPI disabled, placeholders not registered");
+      getSLF4JLogger().info("PlaceholderAPI disabled, placeholders not registered");
     }
   }
 

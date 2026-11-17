@@ -1,9 +1,6 @@
 package ru.brainrtp.eastereggs.data.action;
 
-import api.logging.Logger;
 import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 import lombok.Data;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
@@ -13,6 +10,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
+import ru.brainrtp.eastereggs.EasterEggs;
+import ru.brainrtp.eastereggs.configuration.Configuration;
 import ru.brainrtp.eastereggs.util.text.Colors;
 
 @Data
@@ -46,7 +45,9 @@ public class ActionMoney implements Action {
   private static void warnNoEconomy() {
     if (!noEconomyWarned) {
       noEconomyWarned = true;
-      Logger.warn("Economy provider not found, money actions are skipped");
+      EasterEggs.getPlugin()
+          .getSLF4JLogger()
+          .warn("Economy provider not found, money actions are skipped");
     }
   }
 
@@ -74,19 +75,15 @@ public class ActionMoney implements Action {
       try {
         Float.parseFloat(String.valueOf(node.raw()));
       } catch (NumberFormatException exception) {
-        String pathToWarn =
-            Arrays.stream(node.path().array())
-                .map(Object::toString)
-                .collect(Collectors.joining("."))
-                .concat(".");
-
         String logMessage =
             """
-            &fThe &e''{0}''&r parameter must be an float. Right now value is - &e''{1}''. &r
+            &fThe &e'{}'&r parameter must be an float. Right now value is - &e'{}'. &r
             Setting the default value to &e0.0&r
-            Full path to this param - &e{2}&r\
+            Full path to this param - &e{}&r\
             """;
-        Logger.warn(Colors.of(logMessage), param, node.raw(), pathToWarn);
+        EasterEggs.getPlugin()
+            .getSLF4JLogger()
+            .warn(Colors.of(logMessage), param, node.raw(), Configuration.path(node) + ".");
       }
     }
   }

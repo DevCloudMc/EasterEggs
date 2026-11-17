@@ -1,6 +1,5 @@
 package ru.brainrtp.eastereggs.services;
 
-import api.logging.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,6 +12,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import ru.brainrtp.eastereggs.EasterEggs;
 import ru.brainrtp.eastereggs.configuration.Configuration;
 import ru.brainrtp.eastereggs.configuration.Language;
 import ru.brainrtp.eastereggs.data.EasterEggCategory;
@@ -92,6 +92,10 @@ public class EasterEggService {
     return CATEGORY_NAME.matcher(name).matches();
   }
 
+  public List<String> getCategoryNames() {
+    return categories.values().stream().map(EasterEggCategory::getShortCategoryName).toList();
+  }
+
   public Collection<EasterEggCategory> getAllCategories() {
     return categories.values();
   }
@@ -129,7 +133,9 @@ public class EasterEggService {
       Files.createFile(eggsPath.resolve(categoryName + ".conf"));
       category.setConfig(new Configuration(categoryName + ".conf", eggsPath));
     } catch (IOException e) {
-      Logger.error("Could not create the file of category {0}", e, categoryName);
+      EasterEggs.getPlugin()
+          .getSLF4JLogger()
+          .error("Could not create the file of category {}", categoryName, e);
       return false;
     }
     category.save();
@@ -166,6 +172,45 @@ public class EasterEggService {
         }
       }
     }
+  }
+
+  // the listeners share these three steps; true when an egg was there
+  public boolean findEgg(Player player, Optional<EasterEgg> egg) {
+    if (egg.isEmpty()) {
+      return false;
+    }
+    if (playerEggsService.isCompletedEgg(player.getUniqueId(), egg.get())) {
+      player.sendMessage(language.getSingleMessage("egg", "find", "already"));
+    } else {
+      egg.get().activate(player);
+    }
+    return true;
+  }
+
+  public void createEgg(Player player, String category, EasterEgg egg) {
+    if (eggIndex.containsKey(indexKey(egg))) {
+      player.sendMessage(language.getSingleMessage("egg", "create", "already"));
+      return;
+    }
+    createNewEgg(category, egg);
+    player.sendMessage(
+        language
+            .getSingleMessage("egg", "create", "success")
+            .replace("{egg}", String.valueOf(egg.getId())));
+  }
+
+  public void deleteEggAt(Player player, Optional<EasterEgg> found) {
+    String category = editor.getEditCategory(player.getUniqueId());
+    found
+        .filter(e -> e.getCategory().equals(category))
+        .ifPresent(egg -> {
+          deleteEgg(category, egg);
+          player.sendMessage(
+              language
+                  .getSingleMessage("egg", "delete", "success")
+                  .replace("{egg}", String.valueOf(egg.getId()))
+                  .replace("{category}", egg.getCategory()));
+        });
   }
 
   /**
@@ -241,12 +286,18 @@ public class EasterEggService {
         category.setConfig(config);
         EasterEggCategory other = loaded.putIfAbsent(name, category);
         if (other != null) {
-          Logger.error(
-              "Skipped {0}: category {1} is already loaded from {2}",
-              file.getName(), name, other.getConfig().getFileName());
+          EasterEggs.getPlugin()
+              .getSLF4JLogger()
+              .error(
+                  "Skipped {}: category {} is already loaded from {}",
+                  file.getName(),
+                  name,
+                  other.getConfig().getFileName());
         }
       } catch (Exception e) {
-        Logger.error("Skipped {0}: {1}", e, file.getName(), e.getMessage());
+        EasterEggs.getPlugin()
+            .getSLF4JLogger()
+            .error("Skipped {}: {}", file.getName(), e.getMessage(), e);
       }
     }
 
@@ -255,14 +306,20 @@ public class EasterEggService {
       for (EasterEgg egg : category.getEggs().values()) {
         EasterEgg other = eggIndex.putIfAbsent(indexKey(egg), egg);
         if (other != null) {
-          Logger.warn(
-              "Egg {0} of category {1} cannot be found: egg {2} of category {3} is on the same"
-                  + " block or entity",
-              egg.getId(), egg.getCategory(), other.getId(), other.getCategory());
+          EasterEggs.getPlugin()
+              .getSLF4JLogger()
+              .warn(
+                  "Egg {} of category {} cannot be found: egg {} of category {} is on the same"
+                      + " block or entity",
+                  egg.getId(),
+                  egg.getCategory(),
+                  other.getId(),
+                  other.getCategory());
         }
       }
-      Logger.info(
-          "Loaded {0} eggs in category {1}", category.getEggs().size(), category.getTitle());
+      EasterEggs.getPlugin()
+          .getSLF4JLogger()
+          .info("Loaded {} eggs in category {}", category.getEggs().size(), category.getTitle());
     }
     categories.clear();
     categories.putAll(loaded);

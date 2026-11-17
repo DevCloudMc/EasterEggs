@@ -31,69 +31,59 @@ public class ClearPlayerDataCommand extends Command {
 
   @Override
   public void execute(CommandSender sender, String[] args) {
-    // TODO: (19.02 20:05) Kludge :(
     if (args.length == 0) {
       sender.sendMessage(getUsage());
-    } else if (args.length == 1) {
-      String playerName = args[0];
-      Optional<? extends OfflinePlayer> player = findPlayer(args[0]);
-      if (player.isPresent()) {
-        removeFullPlayerData(player.get().getUniqueId());
-        sender.sendMessage(
-            language
-                .getSingleMessage("player", "data", "full", "removed")
-                .replace("{player}", playerName));
-      } else {
-        sender.sendMessage(
-            language.getSingleMessage("player", "not_found").replace("{player}", playerName));
-      }
-    } else if (args.length == 2) {
-      String playerName = args[0];
-      Optional<? extends OfflinePlayer> player = findPlayer(args[0]);
-      if (player.isPresent()) {
-        Optional<EasterEggCategory> easterEggCategory = eggService.getCategory(args[1]);
-        if (easterEggCategory.isPresent()) {
-          removePlayerCategory(player.get().getUniqueId(), easterEggCategory.get());
-          sender.sendMessage(
-              language
-                  .getSingleMessage("player", "data", "category", "removed")
-                  .replace("{player}", playerName)
-                  .replace("{category}", easterEggCategory.get().getShortCategoryName()));
-        } else {
-          sender.sendMessage(language.getSingleMessage("category", "not_exist"));
-        }
-      } else {
-        sender.sendMessage(
-            language.getSingleMessage("player", "not_found").replace("{player}", playerName));
-      }
-
-    } else if (args.length == 3) {
-      String playerName = args[0];
-      Optional<? extends OfflinePlayer> player = findPlayer(args[0]);
-      if (player.isPresent()) {
-        Optional<EasterEggCategory> easterEggCategory = eggService.getCategory(args[1]);
-        if (easterEggCategory.isPresent()) {
-          int eggId = parseInt(args[2]);
-          Optional<EasterEgg> easterEgg = easterEggCategory.get().getEgg(eggId);
-          if (easterEgg.isPresent()) {
-            removePlayerEgg(player.get().getUniqueId(), easterEgg.get());
-            sender.sendMessage(
-                language
-                    .getSingleMessage("player", "data", "egg", "removed")
-                    .replace("{player}", playerName)
-                    .replace("{category}", easterEggCategory.get().getShortCategoryName())
-                    .replace("{egg}", String.valueOf(easterEgg.get().getId())));
-          } else {
-            sender.sendMessage(language.getSingleMessage("egg", "not_exist"));
-          }
-        } else {
-          sender.sendMessage(language.getSingleMessage("category", "not_exist"));
-        }
-      } else {
-        sender.sendMessage(
-            language.getSingleMessage("player", "not_found").replace("{player}", playerName));
-      }
+      return;
     }
+    if (args.length > 3) {
+      return;
+    }
+
+    String playerName = args[0];
+    Optional<? extends OfflinePlayer> player = findPlayer(playerName);
+    if (player.isEmpty()) {
+      sender.sendMessage(
+          language.getSingleMessage("player", "not_found").replace("{player}", playerName));
+      return;
+    }
+    UUID uuid = player.get().getUniqueId();
+    if (args.length == 1) {
+      playerEggsService.removeFullPlayerData(uuid);
+      sender.sendMessage(
+          language
+              .getSingleMessage("player", "data", "full", "removed")
+              .replace("{player}", playerName));
+      return;
+    }
+
+    Optional<EasterEggCategory> category = eggService.getCategory(args[1]);
+    if (category.isEmpty()) {
+      sender.sendMessage(language.getSingleMessage("category", "not_exist"));
+      return;
+    }
+    String categoryName = category.get().getShortCategoryName();
+    if (args.length == 2) {
+      playerEggsService.removePlayerCategory(uuid, category.get());
+      sender.sendMessage(
+          language
+              .getSingleMessage("player", "data", "category", "removed")
+              .replace("{player}", playerName)
+              .replace("{category}", categoryName));
+      return;
+    }
+
+    Optional<EasterEgg> egg = category.get().getEgg(parseInt(args[2]));
+    if (egg.isEmpty()) {
+      sender.sendMessage(language.getSingleMessage("egg", "not_exist"));
+      return;
+    }
+    playerEggsService.removePlayerEgg(uuid, egg.get());
+    sender.sendMessage(
+        language
+            .getSingleMessage("player", "data", "egg", "removed")
+            .replace("{player}", playerName)
+            .replace("{category}", categoryName)
+            .replace("{egg}", String.valueOf(egg.get().getId())));
   }
 
   private Optional<? extends OfflinePlayer> findPlayer(String playerName) {
@@ -115,40 +105,12 @@ public class ClearPlayerDataCommand extends Command {
     return optionalPlayer;
   }
 
-  private void removePlayerEgg(UUID playerUUID, EasterEgg egg) {
-    playerEggsService.removePlayerEgg(playerUUID, egg);
-  }
-
-  private void removePlayerCategory(UUID playerUUID, EasterEggCategory easterEggCategory) {
-    playerEggsService.removePlayerCategory(playerUUID, easterEggCategory);
-  }
-
-  private void removeFullPlayerData(UUID playerUUID) {
-    playerEggsService.removeFullPlayerData(playerUUID);
-  }
-
-  private int parseInt(String number) {
-    try {
-      return Integer.parseInt(number);
-    } catch (NumberFormatException e) {
-      return -1;
-    }
-  }
-
   @Override
   public List<String> getTabComplete(String[] args) {
     if (args.length == 2) {
       return Bukkit.getOnlinePlayers().stream().map((Player::getName)).toList();
     } else if (args.length == 3) {
-      return eggService.getAllCategories().stream()
-          .map(EasterEggCategory::getShortCategoryName)
-          .toList();
+      return eggService.getCategoryNames();
     } else return null;
-  }
-
-  @Override
-  public List<String> onTabComplete(
-      CommandSender commandSender, org.bukkit.command.Command command, String s, String[] strings) {
-    return null;
   }
 }

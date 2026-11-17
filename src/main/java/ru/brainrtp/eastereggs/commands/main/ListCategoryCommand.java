@@ -49,8 +49,6 @@ public class ListCategoryCommand extends Command {
       return;
     }
 
-    PagedList pagedList = new PagedList(language.getSingleMessage("egg", "list", "title"));
-
     List<Component> content = new ArrayList<>();
     eggService
         .getAllCategories()
@@ -79,13 +77,6 @@ public class ListCategoryCommand extends Command {
           }
         });
 
-    pagedList.setContent(content);
-    pagedList.openPage(page, player);
-  }
-
-  @Override
-  public List<String> onTabComplete(
-      CommandSender commandSender, org.bukkit.command.Command command, String s, String[] strings) {
-    return null;
+    PagedList.open(player, language.getSingleMessage("egg", "list", "title"), content, page);
   }
 }

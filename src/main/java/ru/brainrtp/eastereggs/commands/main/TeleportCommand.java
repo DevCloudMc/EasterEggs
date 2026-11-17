@@ -1,11 +1,17 @@
 package ru.brainrtp.eastereggs.commands.main;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import ru.brainrtp.eastereggs.commands.Command;
@@ -17,17 +23,19 @@ import ru.brainrtp.eastereggs.util.highlighter.Highlighter;
 import ru.brainrtp.eastereggs.util.highlighter.Highlighters;
 import ru.brainrtp.eastereggs.util.text.Colors;
 
-public class TeleportCommand extends Command {
+public class TeleportCommand extends Command implements Listener {
 
   private final Language language;
   private final EasterEggService eggService;
   private final Plugin plugin;
+  private final Map<UUID, GameMode> previousModes = new HashMap<>();
 
   public TeleportCommand(Language language, EasterEggService eggService, Plugin plugin) {
     this.language = language;
     this.eggService = eggService;
     this.plugin = plugin;
     setUsage(Colors.of("&e/ee tp <category> <id>"));
+    plugin.getServer().getPluginManager().registerEvents(this, plugin);
   }
 
   @Override
@@ -72,11 +80,12 @@ public class TeleportCommand extends Command {
           return;
         }
         // a second /ee tp during the 5 seconds keeps the first remembered mode
-        GameMode previous =
-            player.getGameMode() == GameMode.SPECTATOR ? null : player.getGameMode();
+        if (player.getGameMode() != GameMode.SPECTATOR) {
+          previousModes.put(player.getUniqueId(), player.getGameMode());
+        }
         player.setGameMode(GameMode.SPECTATOR);
         player.teleport(location);
-        createTempHighlight(Highlighters.create(egg.get(), player), player, previous);
+        createTempHighlight(Highlighters.create(egg.get(), player), player);
         return;
       }
 
@@ -87,28 +96,30 @@ public class TeleportCommand extends Command {
     player.sendMessage(language.getSingleMessage("category", "not_exist"));
   }
 
-  private void createTempHighlight(Highlighter highlighter, Player player, GameMode previous) {
+  private void createTempHighlight(Highlighter highlighter, Player player) {
     new BukkitRunnable() {
       @Override
       public void run() {
         highlighter.clear();
+        GameMode previous = previousModes.remove(player.getUniqueId());
         if (previous != null && player.isOnline()) player.setGameMode(previous);
       }
     }.runTaskLater(plugin, (long) 20 * 5);
   }
 
-  @Override
-  public List<String> getTabComplete(String[] args) {
-    if (args.length == 2) {
-      return eggService.getAllCategories().stream()
-          .map(EasterEggCategory::getShortCategoryName)
-          .toList();
-    } else return null;
+  // the mode is saved with the player data at quit, so it is restored here and not after the delay
+  @EventHandler
+  public void onQuit(PlayerQuitEvent event) {
+    GameMode previous = previousModes.remove(event.getPlayer().getUniqueId());
+    if (previous != null) {
+      event.getPlayer().setGameMode(previous);
+    }
   }
 
   @Override
-  public List<String> onTabComplete(
-      CommandSender commandSender, org.bukkit.command.Command command, String s, String[] strings) {
-    return null;
+  public List<String> getTabComplete(String[] args) {
+    if (args.length == 2) {
+      return eggService.getCategoryNames();
+    } else return null;
   }
 }

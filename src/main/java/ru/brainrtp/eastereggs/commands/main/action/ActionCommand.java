@@ -1,6 +1,5 @@
 package ru.brainrtp.eastereggs.commands.main.action;
 
-import java.util.Collections;
 import java.util.List;
 import org.bukkit.command.CommandSender;
 import ru.brainrtp.eastereggs.commands.Command;
@@ -22,11 +21,5 @@ public class ActionCommand extends Command {
   @Override
   public List<String> getTabComplete(String[] args) {
     return List.of("add", "remove");
-  }
-
-  @Override
-  public List<String> onTabComplete(
-      CommandSender commandSender, org.bukkit.command.Command command, String s, String[] strings) {
-    return Collections.emptyList();
   }
 }

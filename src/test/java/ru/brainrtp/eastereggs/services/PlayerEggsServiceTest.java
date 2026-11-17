@@ -6,8 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import api.logging.Logger;
-import api.logging.handlers.JULHandler;
 import java.nio.file.Path;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -15,6 +13,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.spongepowered.configurate.BasicConfigurationNode;
+import ru.brainrtp.eastereggs.TestPlugin;
 import ru.brainrtp.eastereggs.data.eggs.EasterEgg;
 import ru.brainrtp.eastereggs.data.eggs.EggBlock;
 import ru.brainrtp.eastereggs.storage.Storage;
@@ -26,8 +25,8 @@ class PlayerEggsServiceTest {
   @TempDir Path dataFolder;
 
   @BeforeAll
-  static void logger() {
-    Logger.init(new JULHandler(java.util.logging.Logger.getLogger("test")));
+  static void logger() throws Exception {
+    TestPlugin.install();
   }
 
   @Test

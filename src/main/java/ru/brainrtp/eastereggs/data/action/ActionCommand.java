@@ -48,33 +48,23 @@ public class ActionCommand implements Action {
     public ActionCommand deserialize(Type type, ConfigurationNode node)
         throws SerializationException {
       ActionCommand actionCommand = new ActionCommand();
-      if (!node.node(PLAYER_NODE).isNull()) {
-        if (node.node(PLAYER_NODE).isList()) {
-          EnumMap<CommandType, List<String>> playerCommands = actionCommand.getCommands();
-          playerCommands.put(CommandType.PLAYER, node.node(PLAYER_NODE).getList(String.class));
-          actionCommand.setCommands(playerCommands);
-        } else {
-          EnumMap<CommandType, List<String>> playerCommands = actionCommand.getCommands();
-          List<String> singleCommand =
-              Collections.singletonList(node.node(PLAYER_NODE).getString());
-          playerCommands.put(CommandType.PLAYER, singleCommand);
-          actionCommand.setCommands(playerCommands);
-        }
-      }
-      if (!node.node(CONSOLE_NODE).isNull()) {
-        if (node.node(CONSOLE_NODE).isList()) {
-          EnumMap<CommandType, List<String>> consoleCommands = actionCommand.getCommands();
-          consoleCommands.put(CommandType.CONSOLE, node.node(CONSOLE_NODE).getList(String.class));
-          actionCommand.setCommands(consoleCommands);
-        } else {
-          EnumMap<CommandType, List<String>> consoleCommands = actionCommand.getCommands();
-          List<String> singleCommand =
-              Collections.singletonList(node.node(CONSOLE_NODE).getString());
-          consoleCommands.put(CommandType.CONSOLE, singleCommand);
-          actionCommand.setCommands(consoleCommands);
-        }
-      }
+      put(actionCommand, CommandType.PLAYER, node.node(PLAYER_NODE));
+      put(actionCommand, CommandType.CONSOLE, node.node(CONSOLE_NODE));
       return actionCommand;
+    }
+
+    private static void put(ActionCommand actionCommand, CommandType type, ConfigurationNode value)
+        throws SerializationException {
+      if (value.isNull()) {
+        return;
+      }
+      actionCommand
+          .getCommands()
+          .put(
+              type,
+              value.isList()
+                  ? value.getList(String.class)
+                  : Collections.singletonList(value.getString()));
     }
 
     @Override

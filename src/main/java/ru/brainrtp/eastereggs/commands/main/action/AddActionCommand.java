@@ -112,18 +112,4 @@ public class AddActionCommand extends Command {
             .load();
     return node.get(actionType);
   }
-
-  private int parseInt(String number) {
-    try {
-      return Integer.parseInt(number);
-    } catch (NumberFormatException e) {
-      return -1;
-    }
-  }
-
-  @Override
-  public List<String> onTabComplete(
-      CommandSender commandSender, org.bukkit.command.Command command, String s, String[] strings) {
-    return null;
-  }
 }

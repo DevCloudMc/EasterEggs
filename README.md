@@ -1,7 +1,16 @@
-# EasterEggs3.0
+# EasterEggs 4.0.0
 
 This plugin allows you to create easter eggs (blocks, entities, ~~NPC~~). By clicking  
 them u can run various actions and events.
+
+## Requirements
+
+EasterEggs 4.0.0 runs on Paper 26.3 with Java 25 and does not support older servers. Vault (or VaultUnlocked) and PlaceholderAPI are optional. Found eggs are stored in SQLite by default or in PostgreSQL, see Installation.
+
+Breaking changes from 3.0:
+- MySQL support is removed and its data is not migrated.
+- Category names are limited to latin letters, digits, `_` and `-`, up to 32 characters.
+- Highlights, holograms and messages use the Paper API instead of packets, so ProtocolLib and GlowAPI are no longer needed.
 
 ## Installation
 

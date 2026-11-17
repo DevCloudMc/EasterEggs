@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import api.logging.Logger;
-import api.logging.handlers.JULHandler;
 import java.lang.reflect.Proxy;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
+import ru.brainrtp.eastereggs.TestPlugin;
 import ru.brainrtp.eastereggs.configuration.Language;
 import ru.brainrtp.eastereggs.data.NamedLocation;
 import ru.brainrtp.eastereggs.data.action.ActionFirework;
@@ -30,7 +29,6 @@ import ru.brainrtp.eastereggs.data.action.ActionMoney;
 import ru.brainrtp.eastereggs.data.eggs.EasterEgg;
 import ru.brainrtp.eastereggs.data.eggs.EggBlock;
 import ru.brainrtp.eastereggs.data.eggs.EggEntity;
-import ru.brainrtp.eastereggs.serializer.ActionSerializer;
 
 class CategoryRoundTripTest {
 
@@ -47,8 +45,7 @@ class CategoryRoundTripTest {
                 getClass().getClassLoader(),
                 new Class<?>[] {Plugin.class},
                 (proxy, method, args) -> dataFolder.toFile());
-    Logger.init(new JULHandler(java.util.logging.Logger.getLogger("test")));
-    ActionSerializer.init();
+    TestPlugin.install();
     // a proxy cannot load resources, so Language finds the file already in place
     try (var stream = getClass().getResourceAsStream("/lang_en.conf")) {
       Files.copy(stream, dataFolder.resolve("lang_en.conf"));

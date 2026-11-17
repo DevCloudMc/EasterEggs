@@ -94,18 +94,4 @@ public class RemoveActionCommand extends Command {
 
     player.sendMessage(language.getSingleMessage("action", "not_exist"));
   }
-
-  private int parseInt(String number) {
-    try {
-      return Integer.parseInt(number);
-    } catch (NumberFormatException e) {
-      return -1;
-    }
-  }
-
-  @Override
-  public List<String> onTabComplete(
-      CommandSender commandSender, org.bukkit.command.Command command, String s, String[] strings) {
-    return null;
-  }
 }

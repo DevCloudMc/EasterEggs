@@ -1,8 +1,8 @@
 package ru.brainrtp.eastereggs.commands;
 
 import java.util.*;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import ru.brainrtp.eastereggs.EasterEggs;
 import ru.brainrtp.eastereggs.data.EasterEggCategory;
@@ -10,7 +10,7 @@ import ru.brainrtp.eastereggs.services.PlayerEggsService;
 import ru.brainrtp.eastereggs.storage.EggKey;
 import ru.brainrtp.eastereggs.util.text.Colors;
 
-public abstract class Command implements TabExecutor {
+public abstract class Command implements CommandExecutor {
 
   private String permission;
   private String[] usage;
@@ -32,6 +32,14 @@ public abstract class Command implements TabExecutor {
 
   public String getPermission() {
     return permission;
+  }
+
+  protected static int parseInt(String number) {
+    try {
+      return Integer.parseInt(number);
+    } catch (NumberFormatException e) {
+      return -1;
+    }
   }
 
   public Command addSub(String arg, Command command) {

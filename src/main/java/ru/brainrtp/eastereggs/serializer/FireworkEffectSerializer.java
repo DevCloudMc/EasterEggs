@@ -1,17 +1,17 @@
 package ru.brainrtp.eastereggs.serializer;
 
-import api.logging.Logger;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
+import ru.brainrtp.eastereggs.EasterEggs;
+import ru.brainrtp.eastereggs.configuration.Configuration;
 import ru.brainrtp.eastereggs.util.text.Colors;
 
 public class FireworkEffectSerializer implements TypeSerializer<FireworkEffect> {
@@ -82,35 +82,27 @@ public class FireworkEffectSerializer implements TypeSerializer<FireworkEffect> 
   }
 
   private void paramMustBeAnHex(ConfigurationNode node, String param) {
-    String pathToWarn =
-        Arrays.stream(node.path().array())
-            .map(Object::toString)
-            .collect(Collectors.joining("."))
-            .concat(".");
-
     String logMessage =
         """
-        &fThe &e''{0}''&r color must be an HEX format. Setting the default value to &eFFF &r(white color).
+        &fThe &e'{}'&r color must be an HEX format. Setting the default value to &eFFF &r(white color).
         Check more HEX colors here: https://www.color-hex.com/
-        Full path to this param - &e{1}&r\
+        Full path to this param - &e{}&r\
         """;
-    Logger.warn(Colors.of(logMessage), param, pathToWarn + param);
+    EasterEggs.getPlugin()
+        .getSLF4JLogger()
+        .warn(Colors.of(logMessage), param, Configuration.path(node) + "." + param);
   }
 
   private void enumValueNotFound(ConfigurationNode node, String param) {
-    String pathToWarn =
-        Arrays.stream(node.path().array())
-            .map(Object::toString)
-            .collect(Collectors.joining("."))
-            .concat(".");
-
     String logMessage =
         """
-        &fThe &e{0}&r firework type not found. Setting the default value to &eBALL&r.
+        &fThe &e{}&r firework type not found. Setting the default value to &eBALL&r.
         Check more firework types here:
         https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/FireworkEffect.Type.html
-        Full path to this param - &e{1}&r\
+        Full path to this param - &e{}&r\
         """;
-    Logger.warn(Colors.of(logMessage), param, pathToWarn + param);
+    EasterEggs.getPlugin()
+        .getSLF4JLogger()
+        .warn(Colors.of(logMessage), param, Configuration.path(node) + "." + param);
   }
 }

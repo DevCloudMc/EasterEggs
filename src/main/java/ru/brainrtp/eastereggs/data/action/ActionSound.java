@@ -1,9 +1,6 @@
 package ru.brainrtp.eastereggs.data.action;
 
-import api.logging.Logger;
 import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 import lombok.Data;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
@@ -14,6 +11,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
+import ru.brainrtp.eastereggs.EasterEggs;
+import ru.brainrtp.eastereggs.configuration.Configuration;
 import ru.brainrtp.eastereggs.data.NamedLocation;
 import ru.brainrtp.eastereggs.util.text.Colors;
 
@@ -50,27 +49,12 @@ public class ActionSound implements Action {
         throws SerializationException {
       ActionSound actionSound = new ActionSound();
 
-      if (!node.isMap()) {
+      ConfigurationNode soundNode = node.isMap() ? node.node(TYPE_NODE) : node;
+      if (!node.isMap() || !soundNode.isNull()) {
         try {
-          actionSound.setSound(findSound(node.getString()));
+          actionSound.setSound(findSound(soundNode.getString()));
         } catch (IllegalArgumentException e) {
-          String pathToWarn =
-              Arrays.stream(node.path().array())
-                  .map(Object::toString)
-                  .collect(Collectors.joining("."));
-
-          soundNotFound(node, pathToWarn);
-        }
-
-      } else if (!node.node(TYPE_NODE).isNull()) {
-        try {
-          actionSound.setSound(findSound(node.node(TYPE_NODE).getString()));
-        } catch (IllegalArgumentException e) {
-          String pathToWarn =
-              Arrays.stream(node.path().array())
-                  .map(Object::toString)
-                  .collect(Collectors.joining("."));
-          soundNotFound(node.node(TYPE_NODE), pathToWarn + ".type");
+          soundNotFound(soundNode, Configuration.path(soundNode));
         }
       }
 
@@ -122,19 +106,19 @@ public class ActionSound implements Action {
 
     private void paramMustBeAnFloatOrInteger(ConfigurationNode node, String param) {
       if (!(node.node(param).raw() instanceof Number)) {
-        String pathToWarn =
-            Arrays.stream(node.path().array())
-                .map(Object::toString)
-                .collect(Collectors.joining("."))
-                .concat(".");
-
         String logMessage =
             """
-            The &e''{0}''&r parameter must be an float or integer. Right now value is - &e''{1}''.&r
+            The &e'{}'&r parameter must be an float or integer. Right now value is - &e'{}'.&r
             Setting the default value to &e1.0&r
-            Full path to this param - &e{2}&r\
+            Full path to this param - &e{}&r\
             """;
-        Logger.warn(Colors.of(logMessage), param, node.node(param).raw(), pathToWarn + param);
+        EasterEggs.getPlugin()
+            .getSLF4JLogger()
+            .warn(
+                Colors.of(logMessage),
+                param,
+                node.node(param).raw(),
+                Configuration.path(node) + "." + param);
       }
     }
 

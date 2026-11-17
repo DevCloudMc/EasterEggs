@@ -1,6 +1,5 @@
 package ru.brainrtp.eastereggs.commands.main.category;
 
-import java.util.List;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import ru.brainrtp.eastereggs.commands.Command;
@@ -40,11 +39,5 @@ public class CreateCategoryCommand extends Command {
               .getSingleMessage("category", "create", "success")
               .replace("{category}", args[0]));
     }
-  }
-
-  @Override
-  public List<String> onTabComplete(
-      CommandSender commandSender, org.bukkit.command.Command command, String s, String[] strings) {
-    return null;
   }
 }

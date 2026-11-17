@@ -1,6 +1,5 @@
 package ru.brainrtp.eastereggs.data;
 
-import api.logging.Logger;
 import io.leangen.geantyref.TypeToken;
 import java.lang.reflect.Type;
 import java.util.Map;
@@ -12,6 +11,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
+import ru.brainrtp.eastereggs.EasterEggs;
 import ru.brainrtp.eastereggs.configuration.Configuration;
 import ru.brainrtp.eastereggs.data.action.Actions;
 import ru.brainrtp.eastereggs.data.eggs.EasterEgg;
@@ -75,7 +75,9 @@ public class EasterEggCategory {
       config.get().set(null);
       config.get().set(this);
     } catch (SerializationException e) {
-      Logger.error("Could not save category {0}, the file is left as it was", e, shortCategoryName);
+      EasterEggs.getPlugin()
+          .getSLF4JLogger()
+          .error("Could not save category {}, the file is left as it was", shortCategoryName, e);
       return;
     }
     config.save();
@@ -100,7 +102,9 @@ public class EasterEggCategory {
         String typeStr = child.node(TYPE_NODE).getString();
         TypeToken<? extends EasterEgg> eggType = TokensProvider.getEggType(typeStr);
         if (eggType == null) {
-          Logger.warn("Unknown egg type {0} skipped, path {1}", typeStr, child.path());
+          EasterEggs.getPlugin()
+              .getSLF4JLogger()
+              .warn("Unknown egg type {} skipped, path {}", typeStr, child.path());
           continue;
         }
 

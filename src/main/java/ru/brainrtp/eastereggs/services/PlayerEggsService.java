@@ -1,6 +1,5 @@
 package ru.brainrtp.eastereggs.services;
 
-import api.logging.Logger;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
@@ -13,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import ru.brainrtp.eastereggs.EasterEggs;
 import ru.brainrtp.eastereggs.data.EasterEggCategory;
 import ru.brainrtp.eastereggs.data.eggs.EasterEgg;
 import ru.brainrtp.eastereggs.storage.EggKey;
@@ -167,9 +167,12 @@ public class PlayerEggsService {
     storageThread.shutdown();
     try {
       if (!storageThread.awaitTermination(TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
-        Logger.error(
-            "Storage queue did not drain in {0} s, {1} queued writes are lost",
-            TIMEOUT_SECONDS, storageThread.shutdownNow().size());
+        EasterEggs.getPlugin()
+            .getSLF4JLogger()
+            .error(
+                "Storage queue did not drain in {} s, {} queued writes are lost",
+                TIMEOUT_SECONDS,
+                storageThread.shutdownNow().size());
       }
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
@@ -198,7 +201,7 @@ public class PlayerEggsService {
         onSuccess.run();
       } catch (Exception e) {
         onFailure.run();
-        Logger.error("Could not {0}", e, what);
+        EasterEggs.getPlugin().getSLF4JLogger().error("Could not {}", what, e);
       }
     });
   }

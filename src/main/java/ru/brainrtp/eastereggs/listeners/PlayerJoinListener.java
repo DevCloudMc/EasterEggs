@@ -1,6 +1,5 @@
 package ru.brainrtp.eastereggs.listeners;
 
-import api.logging.Logger;
 import com.destroystokyo.paper.event.player.PlayerConnectionCloseEvent;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -27,7 +26,9 @@ public class PlayerJoinListener implements Listener {
     try {
       playerService.loadPlayerData(e.getUniqueId());
     } catch (Exception ex) {
-      Logger.error("Could not load eggs of {0}, login denied", ex, e.getName());
+      EasterEggs.getPlugin()
+          .getSLF4JLogger()
+          .error("Could not load eggs of {}, login denied", e.getName(), ex);
       e.disallow(
           AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
           Colors.component(

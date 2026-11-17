@@ -1,6 +1,5 @@
 package ru.brainrtp.eastereggs.listeners;
 
-import java.util.Optional;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Hanging;
@@ -12,18 +11,14 @@ import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import ru.brainrtp.eastereggs.EasterEggs;
-import ru.brainrtp.eastereggs.configuration.Language;
-import ru.brainrtp.eastereggs.data.eggs.EasterEgg;
 import ru.brainrtp.eastereggs.data.eggs.EggEntity;
 import ru.brainrtp.eastereggs.services.EasterEggService;
 
 public class PlayerInteractEntityListener implements Listener {
 
-  private final Language language;
   private final EasterEggService service;
 
   public PlayerInteractEntityListener() {
-    language = EasterEggs.getLanguage();
     service = EasterEggs.getEggService();
   }
 
@@ -54,12 +49,8 @@ public class PlayerInteractEntityListener implements Listener {
   private boolean executeEvent(PlayerInteractEntityEvent event) {
     Player player = event.getPlayer();
     Entity target = event.getRightClicked();
-    try {
-      if (event.getHand() == EquipmentSlot.OFF_HAND) {
-        return false;
-      }
-    } catch (NoSuchMethodError e) {
-
+    if (event.getHand() == EquipmentSlot.OFF_HAND) {
+      return false;
     }
 
     if (player.getGameMode() == GameMode.SPECTATOR) {
@@ -68,40 +59,13 @@ public class PlayerInteractEntityListener implements Listener {
 
     if (service.getEditor().isEditMode(player.getUniqueId())) {
       // Right click, create entity egg
-      String category = service.getEditor().getEditCategory(player.getUniqueId());
-      Optional<EasterEgg> eggOpt = service.getEasterEgg(target);
-
-      if (!eggOpt.isPresent()) {
-        EggEntity egg = new EggEntity();
-        egg.setEntityLocation(target.getLocation());
-        egg.setEntityUUID(target.getUniqueId());
-
-        service.createNewEgg(category, egg);
-
-        player.sendMessage(
-            language
-                .getSingleMessage("egg", "create", "success")
-                .replace("{egg}", String.valueOf(egg.getId())));
-        return true;
-      }
-
-      player.sendMessage(language.getSingleMessage("egg", "create", "already"));
+      EggEntity egg = new EggEntity();
+      egg.setEntityLocation(target.getLocation());
+      egg.setEntityUUID(target.getUniqueId());
+      service.createEgg(player, service.getEditor().getEditCategory(player.getUniqueId()), egg);
       return true;
     }
 
-    // Activate egg
-    Optional<EasterEgg> egg = service.getEasterEgg(target);
-
-    if (egg.isPresent()) {
-      if (!service.getPlayerService().isCompletedEgg(player.getUniqueId(), egg.get())) {
-        egg.get().activate(player);
-        return true;
-      }
-
-      player.sendMessage(language.getSingleMessage("egg", "find", "already"));
-      return true;
-    }
-
-    return false;
+    return service.findEgg(player, service.getEasterEgg(target));
   }
 }
