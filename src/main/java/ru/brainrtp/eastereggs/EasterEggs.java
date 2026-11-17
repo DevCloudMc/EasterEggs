@@ -6,11 +6,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import lombok.Getter;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import ru.brainrtp.eastereggs.commands.MainCommand;
@@ -34,8 +32,8 @@ public class EasterEggs extends JavaPlugin implements Listener {
 
   private Configuration mainConfig;
   @Getter private static Plugin plugin;
-  @Getter private static Economy economy;
   private Database database;
+  private EggsPlaceholder placeholder;
   @Getter private static Language language;
   @Getter private static EasterEggService eggService;
   @Getter private static Path pluginDataFolder;
@@ -79,22 +77,13 @@ public class EasterEggs extends JavaPlugin implements Listener {
   }
 
   private void registerServices() {
-
-    RegisteredServiceProvider<Economy> registration =
-        getServer().getServicesManager().getRegistration(Economy.class);
-
-    if (registration != null) {
-      economy = registration.getProvider();
-    } else {
-      Logger.error("Economy plugin not installed!");
-    }
-
     getServer()
         .getServicesManager()
         .register(EasterEggService.class, eggService, this, ServicePriority.Normal);
 
     if (getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-      new EggsPlaceholder().register();
+      placeholder = new EggsPlaceholder();
+      placeholder.register();
       getLogger().info("PlaceholderAPI enabled, registered our placeholders");
     } else {
       getLogger().info("PlaceholderAPI disabled, placeholders not registered");
@@ -134,6 +123,9 @@ public class EasterEggs extends JavaPlugin implements Listener {
 
   @Override
   public void onDisable() {
+    if (placeholder != null) {
+      placeholder.unregister();
+    }
     Bukkit.getOnlinePlayers()
         .forEach(player -> {
           if (eggService.getEditor().isEditMode(player.getUniqueId()))

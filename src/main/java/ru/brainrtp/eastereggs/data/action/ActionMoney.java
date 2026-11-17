@@ -5,18 +5,21 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import lombok.Data;
+import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
-import ru.brainrtp.eastereggs.EasterEggs;
 import ru.brainrtp.eastereggs.util.text.Colors;
 
 @Data
 public class ActionMoney implements Action {
 
   private static final String ACTION_NAME = "money";
+  private static boolean noEconomyWarned;
   private float money = 0.0F;
   private static final String MONEY_NODE = "money";
 
@@ -27,7 +30,24 @@ public class ActionMoney implements Action {
 
   @Override
   public void activate(Player player) {
-    EasterEggs.getEconomy().depositPlayer(player, money);
+    if (!Bukkit.getPluginManager().isPluginEnabled("Vault")) {
+      warnNoEconomy();
+      return;
+    }
+    RegisteredServiceProvider<Economy> registration =
+        Bukkit.getServicesManager().getRegistration(Economy.class);
+    if (registration == null) {
+      warnNoEconomy();
+      return;
+    }
+    registration.getProvider().depositPlayer(player, money);
+  }
+
+  private static void warnNoEconomy() {
+    if (!noEconomyWarned) {
+      noEconomyWarned = true;
+      Logger.warn("Economy provider not found, money actions are skipped");
+    }
   }
 
   public static class Serializer implements TypeSerializer<ActionMoney> {

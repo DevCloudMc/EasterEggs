@@ -5,6 +5,8 @@ them u can run various actions and events.
 
 ## Installation
 
+Optional: [VaultUnlocked](https://github.com/TheNewEconomy/VaultUnlocked) 2.20.3 (or Vault) is needed for the `money` action, PlaceholderAPI 2.12.3 is needed for the placeholders below.
+
 Copy the **.jar** file to your plugins folder. Run the server. 
 Now, go to the **config.conf**.  
 You will see the following:

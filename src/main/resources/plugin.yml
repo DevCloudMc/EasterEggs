@@ -3,8 +3,7 @@ version: '${version}'
 main: ru.brainrtp.eastereggs.EasterEggs
 api-version: '26.3'
 author: BrainRTP
-depend: [Vault]
-softdepend: [PlaceholderAPI]
+softdepend: [Vault, PlaceholderAPI]
 libraries:
   - org.spongepowered:configurate-hocon:4.2.0
 commands:
