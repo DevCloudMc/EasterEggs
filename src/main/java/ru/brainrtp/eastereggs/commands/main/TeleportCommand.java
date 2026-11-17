@@ -34,10 +34,14 @@ public class TeleportCommand extends Command {
   public void execute(CommandSender sender, String[] args) {
     if (sender instanceof Player player) {
 
-      if (args.length == 0)
+      if (args.length == 0) {
         player.sendMessage(language.getSingleMessage("errors", "forgot", "name"));
-      else if (args.length == 1)
+        return;
+      }
+      if (args.length == 1) {
         player.sendMessage(language.getSingleMessage("errors", "forgot", "id"));
+        return;
+      }
 
       teleportToEgg(player, args[0], args[1]);
     }
@@ -62,12 +66,17 @@ public class TeleportCommand extends Command {
         Location location = egg.get().getLocation().toLocation();
         if (location == null) {
           player.sendMessage(
-              Colors.of("&cWorld &e" + egg.get().getLocation().world() + " &cis not loaded"));
+              language
+                  .getSingleMessage("egg", "world_not_loaded")
+                  .replace("{world}", egg.get().getLocation().world()));
           return;
         }
+        // a second /ee tp during the 5 seconds keeps the first remembered mode
+        GameMode previous =
+            player.getGameMode() == GameMode.SPECTATOR ? null : player.getGameMode();
         player.setGameMode(GameMode.SPECTATOR);
         player.teleport(location);
-        createTempHighlight(Highlighters.create(egg.get(), player), player);
+        createTempHighlight(Highlighters.create(egg.get(), player), player, previous);
         return;
       }
 
@@ -78,11 +87,12 @@ public class TeleportCommand extends Command {
     player.sendMessage(language.getSingleMessage("category", "not_exist"));
   }
 
-  private void createTempHighlight(Highlighter highlighter, Player player) {
+  private void createTempHighlight(Highlighter highlighter, Player player, GameMode previous) {
     new BukkitRunnable() {
       @Override
       public void run() {
         highlighter.clear();
+        if (previous != null && player.isOnline()) player.setGameMode(previous);
       }
     }.runTaskLater(plugin, (long) 20 * 5);
   }

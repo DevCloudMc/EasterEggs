@@ -2,7 +2,6 @@ package ru.brainrtp.eastereggs.listeners;
 
 import api.logging.Logger;
 import com.destroystokyo.paper.event.player.PlayerConnectionCloseEvent;
-import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -11,6 +10,7 @@ import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import ru.brainrtp.eastereggs.EasterEggs;
 import ru.brainrtp.eastereggs.services.PlayerEggsService;
+import ru.brainrtp.eastereggs.util.text.Colors;
 
 public class PlayerJoinListener implements Listener {
 
@@ -30,7 +30,9 @@ public class PlayerJoinListener implements Listener {
       Logger.error("Could not load eggs of {0}, login denied", ex, e.getName());
       e.disallow(
           AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
-          Component.text("Could not load your EasterEggs data, please try again later"));
+          Colors.component(
+              EasterEggs.getLanguage()
+                  .getSingleMessageWithoutPrefix("player", "data", "load_failed")));
     }
   }
 

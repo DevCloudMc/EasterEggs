@@ -45,7 +45,7 @@ public class ListCategoryCommand extends Command {
       page = Integer.parseInt(pageStr);
     } catch (NumberFormatException e) {
       player.sendMessage(
-          language.getSingleMessage("errors", "number", "parse").replace("{page}", pageStr));
+          language.getSingleMessage("errors", "number", "parse").replace("{param}", "<page>"));
       return;
     }
 

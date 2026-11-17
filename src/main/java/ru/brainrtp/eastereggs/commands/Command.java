@@ -8,6 +8,7 @@ import ru.brainrtp.eastereggs.EasterEggs;
 import ru.brainrtp.eastereggs.data.EasterEggCategory;
 import ru.brainrtp.eastereggs.services.PlayerEggsService;
 import ru.brainrtp.eastereggs.storage.EggKey;
+import ru.brainrtp.eastereggs.util.text.Colors;
 
 public abstract class Command implements TabExecutor {
 
@@ -52,57 +53,54 @@ public abstract class Command implements TabExecutor {
     return this;
   }
 
+  public record Match(Command command, int depth) {}
+
+  // the deepest subcommand named by the leading args; execution and tab completion both use it
+  public Match resolve(String[] args) {
+    Command current = this;
+    int depth = 0;
+    while (depth < args.length) {
+      Command sub = current.getSub(args[depth]);
+      if (sub == null) break;
+      current = sub;
+      depth++;
+    }
+    return new Match(current, depth);
+  }
+
   @Override
   public boolean onCommand(
       CommandSender sender, org.bukkit.command.Command cmd, String label, String[] args) {
     if (!checkPermission(sender, this)) {
-      // TODO: (17.02 19:38) Kludge :(
-      if (sender instanceof Player && sender.hasPermission("ee.user")) showStats((Player) sender);
+      deny(sender);
       return false;
     }
 
+    Match match = resolve(args);
+    if (match.depth() > 0) {
+      if (!checkPermission(sender, match.command())) {
+        deny(sender);
+        return false;
+      }
+      match.command().execute(sender, Arrays.copyOfRange(args, match.depth(), args.length));
+      return true;
+    }
+
     if (args.length > 0) {
-      Stack<Command> stack = new Stack<>();
-      Command sub;
-
-      for (String arg : args) {
-        if (stack.isEmpty()) {
-          sub = getSub(arg);
-          if (sub != null) {
-            stack.push(sub);
-            continue;
-          }
-          break;
-        }
-
-        sub = stack.peek().getSub(arg);
-        if (sub != null) {
-          stack.push(sub);
-          continue;
-        }
-        break;
-      }
-
-      if (!stack.isEmpty()) {
-        Command command = stack.pop();
-        if (!checkPermission(sender, command)) {
-          // TODO: (17.02 19:38) Kludge :(
-          if (sender instanceof Player && sender.hasPermission("ee.user"))
-            showStats((Player) sender);
-          return false;
-        }
-        command.execute(sender, Arrays.copyOfRange(args, stack.size() + 1, args.length));
-        return true;
-      }
-
-      if (usage != null) {
-        sender.sendMessage(usage);
+      if (getUsage() != null) {
+        sender.sendMessage(getUsage());
       }
       return false;
     }
 
     execute(sender, args);
     return true;
+  }
+
+  private void deny(CommandSender sender) {
+    // TODO: (17.02 19:38) Kludge :(
+    if (sender instanceof Player && sender.hasPermission("ee.user")) showStats((Player) sender);
+    else sender.sendMessage(EasterEggs.getLanguage().getSingleMessage("permission", "deny"));
   }
 
   private boolean checkPermission(CommandSender sender, Command command) {
@@ -135,12 +133,16 @@ public abstract class Command implements TabExecutor {
       long playerCategoryEggCount = playerService.countFound(player.getUniqueId(), category);
       int categoryEggSize = category.getEggs().size();
       String categoryTitle = category.getTitle();
+      String output =
+          category.getOutput() != null
+              ? category.getOutput()
+              : EasterEggs.getLanguage().getSingleMessageWithoutPrefix("player", "stats", "info");
       player.sendMessage(
-          category
-              .getOutput()
-              .replace("%found%", String.valueOf(playerCategoryEggCount))
-              .replace("%count%", String.valueOf(categoryEggSize))
-              .replace("%category%", categoryTitle));
+          Colors.component(
+              output
+                  .replace("%found%", String.valueOf(playerCategoryEggCount))
+                  .replace("%count%", String.valueOf(categoryEggSize))
+                  .replace("%category%", categoryTitle)));
     }
     //        int i = 0;
     //

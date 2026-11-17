@@ -60,7 +60,7 @@ Easter eggs actions are adding in edit mode. To add an action just type
 `money` - Gives any amount of money  
 `firework` - Launching a firework  
 
-Those actions are in the json format. Data depends on the variables of 
+Action data is HOCON (plain JSON works too), the same format as in the category files, and may contain spaces. Data depends on the variables of 
 specified action. E.g. `message` action can take the following variables:
 
 #### message
@@ -84,7 +84,7 @@ Here is the list of all actions' variables.
 `console` - Commands list. Specifies whether run a command by console  
 `player` - Commands list. Specifies whether run a command by player  
 Example:  
-`/ee action add <egg_id> commands {player=["/home", "/say Hello"] console=["broadcast Hi!"]}` 
+`/ee action add <egg_id> commands {player=["/home", "/say Hello"], console=["broadcast Hi!"]}` 
 
 #### sound
 `type` - Sound name. Here you can find all of them: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Sound.html   

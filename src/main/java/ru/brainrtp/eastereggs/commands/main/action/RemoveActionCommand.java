@@ -34,7 +34,14 @@ public class RemoveActionCommand extends Command {
         return;
       }
 
-      if (args.length != 2) {
+      if (args.length < 2) {
+        player.sendMessage(
+            language
+                .getSingleMessage("errors", "forgot", "param")
+                .replace("{param}", args.length == 0 ? "<id>" : "<action>"));
+        return;
+      }
+      if (args.length > 2) {
         player.sendMessage(this.getUsage());
         return;
       }
@@ -53,7 +60,7 @@ public class RemoveActionCommand extends Command {
     int eggId = parseInt(id);
     if (eggId == -1) {
       player.sendMessage(
-          String.format(language.getSingleMessage("errors", "number", "parse"), "<id>"));
+          language.getSingleMessage("errors", "number", "parse").replace("{param}", "<id>"));
       return;
     }
 

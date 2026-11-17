@@ -29,7 +29,10 @@ public class DeleteCategoryCommand extends Command {
       }
 
       if (!eggService.deleteCategory(args[0])) {
-        player.sendMessage(language.getSingleMessage("category", "delete", "error"));
+        player.sendMessage(
+            language
+                .getSingleMessage("category", "delete", "error")
+                .replace("{category}", args[0]));
         return;
       }
 

@@ -6,7 +6,6 @@ import org.bukkit.entity.Player;
 import ru.brainrtp.eastereggs.commands.Command;
 import ru.brainrtp.eastereggs.configuration.Language;
 import ru.brainrtp.eastereggs.services.EasterEggService;
-import ru.brainrtp.eastereggs.util.text.Colors;
 
 public class CreateCategoryCommand extends Command {
 
@@ -16,7 +15,6 @@ public class CreateCategoryCommand extends Command {
   public CreateCategoryCommand(Language language, EasterEggService eggService) {
     this.language = language;
     this.eggService = eggService;
-    setUsage(Colors.of("&e/ee category create <name> &7(A-Z, a-z, 0-9, _ and -, up to 32)"));
   }
 
   @Override
@@ -28,7 +26,7 @@ public class CreateCategoryCommand extends Command {
       }
 
       if (!EasterEggService.isValidCategoryName(args[0])) {
-        player.sendMessage(getUsage());
+        player.sendMessage(language.getSingleMessage("category", "create", "invalid_name"));
         return;
       }
 

@@ -6,6 +6,7 @@ import java.util.Map;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import org.bukkit.entity.Player;
+import ru.brainrtp.eastereggs.EasterEggs;
 
 public class PagedList {
 
@@ -41,7 +42,6 @@ public class PagedList {
       return;
     }
 
-    // TODO: (21.02 15:14) Add :)
-    //        player.sendMessage(EasterEggs.getLang().of("egg.list.empty"));
+    player.sendMessage(EasterEggs.getLanguage().getSingleMessage("egg", "list", "empty"));
   }
 }

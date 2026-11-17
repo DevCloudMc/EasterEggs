@@ -31,12 +31,18 @@ public class EasterEggEditor {
   }
 
   public void endEditSessionByCategory(String category) {
-    for (EditSession session : sessions.values()) {
-      if (session.getEditableCategory().equals(category)) {
-        session.end();
-        sessions.remove(session.getPlayer().getUniqueId());
-      }
-    }
+    sessions
+        .values()
+        .removeIf(session -> {
+          if (!session.getEditableCategory().equals(category)) return false;
+          session.end();
+          return true;
+        });
+  }
+
+  public void endAllSessions() {
+    sessions.values().forEach(EditSession::end);
+    sessions.clear();
   }
 
   public String getEditCategory(UUID uuid) {

@@ -29,14 +29,18 @@ public class ActionCommand implements Action {
   public void activate(Player player) {
     commands.forEach((commandType, strings) -> {
       if (CommandType.PLAYER.equals(commandType)) {
-        strings.forEach(command -> {
-          System.out.println("command = " + command);
-          Bukkit.dispatchCommand(player, command);
-        });
+        strings.forEach(
+            command -> Bukkit.dispatchCommand(player, prepare(command, player.getName())));
       } else {
-        strings.forEach(command -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command));
+        strings.forEach(command ->
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), prepare(command, player.getName())));
       }
     });
+  }
+
+  static String prepare(String command, String playerName) {
+    String line = command.replace("%player%", playerName);
+    return line.startsWith("/") ? line.substring(1) : line;
   }
 
   public static class Serializer implements TypeSerializer<ActionCommand> {
