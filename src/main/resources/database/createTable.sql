@@ -5,5 +5,3 @@ CREATE TABLE IF NOT EXISTS eastereggs
     egg_id      INTEGER     NOT NULL,
     UNIQUE (player_uuid, category, egg_id)
 );
-
-CREATE INDEX IF NOT EXISTS eastereggs_player_uuid ON eastereggs (player_uuid);

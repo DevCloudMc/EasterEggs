@@ -2,12 +2,15 @@ package ru.brainrtp.eastereggs.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import api.logging.Logger;
 import api.logging.handlers.JULHandler;
 import java.nio.file.Path;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -29,11 +32,11 @@ class PlayerEggsServiceTest {
 
   @Test
   void queuedFindsAreSavedBeforeShutdownFinishes() throws Exception {
-    PlayerEggsService service = new PlayerEggsService(open());
+    PlayerEggsService service = new PlayerEggsService(open(), Runnable::run);
     service.loadPlayerData(PLAYER);
 
     for (int id = 0; id < 200; id++) {
-      assertTrue(service.addEggToPlayer(PLAYER, egg(id)));
+      assertTrue(service.addEggToPlayer(PLAYER, egg(id), () -> {}));
     }
     service.shutdown();
 
@@ -43,23 +46,53 @@ class PlayerEggsServiceTest {
   }
 
   @Test
-  void failedSaveForgetsTheFind() throws Exception {
+  void failedSaveGivesNoRewardAndForgetsTheFind() throws Exception {
     Storage storage = open();
-    PlayerEggsService service = new PlayerEggsService(storage);
+    PlayerEggsService service = new PlayerEggsService(storage, Runnable::run);
     service.loadPlayerData(PLAYER);
     storage.close();
+    AtomicInteger rewards = new AtomicInteger();
 
-    assertTrue(service.addEggToPlayer(PLAYER, egg(1)));
+    assertTrue(service.addEggToPlayer(PLAYER, egg(1), rewards::incrementAndGet));
     service.shutdown();
 
+    assertEquals(0, rewards.get());
     assertFalse(service.isCompletedEgg(PLAYER, egg(1)));
   }
 
   @Test
-  void nothingIsRecordedWhileDataIsNotLoaded() throws Exception {
-    PlayerEggsService service = new PlayerEggsService(open());
+  void savedFindIsRewardedOnce() throws Exception {
+    PlayerEggsService service = new PlayerEggsService(open(), Runnable::run);
+    service.loadPlayerData(PLAYER);
+    AtomicInteger rewards = new AtomicInteger();
 
-    assertFalse(service.addEggToPlayer(PLAYER, egg(1)));
+    assertTrue(service.addEggToPlayer(PLAYER, egg(1), rewards::incrementAndGet));
+    assertFalse(service.addEggToPlayer(PLAYER, egg(1), rewards::incrementAndGet));
+    service.shutdown();
+
+    assertEquals(1, rewards.get());
+  }
+
+  @Test
+  void dataStaysUntilTheLastConnectionCloses() throws Exception {
+    PlayerEggsService service = new PlayerEggsService(open(), Runnable::run);
+    for (int connection = 0; connection < 2; connection++) {
+      service.addConnection(PLAYER);
+      service.loadPlayerData(PLAYER);
+    }
+
+    service.removePlayerData(PLAYER);
+    assertNotNull(service.getPlayerData(PLAYER));
+    service.removePlayerData(PLAYER);
+    assertNull(service.getPlayerData(PLAYER));
+    service.shutdown();
+  }
+
+  @Test
+  void nothingIsRecordedWhileDataIsNotLoaded() throws Exception {
+    PlayerEggsService service = new PlayerEggsService(open(), Runnable::run);
+
+    assertFalse(service.addEggToPlayer(PLAYER, egg(1), () -> {}));
     service.shutdown();
   }
 

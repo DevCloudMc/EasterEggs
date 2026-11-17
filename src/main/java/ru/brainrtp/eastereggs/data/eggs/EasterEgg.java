@@ -1,5 +1,6 @@
 package ru.brainrtp.eastereggs.data.eggs;
 
+import java.util.UUID;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.bukkit.entity.Player;
@@ -9,6 +10,7 @@ import ru.brainrtp.eastereggs.data.NamedLocation;
 import ru.brainrtp.eastereggs.data.action.Action;
 import ru.brainrtp.eastereggs.data.action.Actions;
 import ru.brainrtp.eastereggs.services.EasterEggService;
+import ru.brainrtp.eastereggs.services.PlayerEggsService;
 
 // same identity as EggKey in storage
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -47,14 +49,29 @@ public abstract class EasterEgg {
     }
 
     EasterEggService service = EasterEggs.getEggService();
-    // record the find before any reward, so a failing action can neither undo nor repeat it
-    if (!service.getPlayerService().addEggToPlayer(player.getUniqueId(), this)) {
-      return;
-    }
-    if (actions != null) {
-      actions.activate(player);
-    }
-    service.finishIfComplete(player, category);
+    PlayerEggsService players = service.getPlayerService();
+    UUID uuid = player.getUniqueId();
+    // decided at the click: with several saves pending, only the last missing egg may finish
+    boolean last =
+        service
+            .getCategory(category)
+            .filter(c -> players.countFound(uuid, c) == c.getEggs().size() - 1)
+            .isPresent();
+    // runs on the main thread after the find is saved, never for a failed save
+    players.addEggToPlayer(
+        uuid,
+        this,
+        () -> {
+          if (!player.isOnline()) {
+            return;
+          }
+          if (actions != null) {
+            actions.activate(player);
+          }
+          if (last) {
+            service.finishIfComplete(player, category);
+          }
+        });
 
     //        int founded =
     // EasterEggs.getEggService().getPlayerService().getPlayerData(player.getUniqueId())

@@ -52,11 +52,19 @@ public class EasterEggs extends JavaPlugin implements Listener {
 
       ActionSerializer.init();
       playerEggs =
-          new PlayerEggsService(Storage.open(mainConfig.get().node("database"), pluginDataFolder));
+          new PlayerEggsService(
+              Storage.open(mainConfig.get().node("database"), pluginDataFolder),
+              // a disabled plugin cannot schedule: rewards of finds saved in onDisable are dropped
+              task -> {
+                if (isEnabled()) {
+                  Bukkit.getScheduler().runTask(this, task);
+                }
+              });
       eggService = new EasterEggService(this, language, playerEggs);
       eggService.reloadAllEggs();
       // plugin reload: players already online get their finds before any listener is registered
       for (Player player : Bukkit.getOnlinePlayers()) {
+        playerEggs.addConnection(player.getUniqueId());
         playerEggs.loadPlayerData(player.getUniqueId());
       }
     } catch (Exception e) {

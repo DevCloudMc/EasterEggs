@@ -58,6 +58,8 @@ public final class Storage implements AutoCloseable {
     Class.forName(config.getDriverClassName());
     // all queries run on the single storage thread of PlayerEggsService
     config.setMaximumPoolSize(1);
+    // well under the 10 s login wait, so one stuck query does not time out every login behind it
+    config.setConnectionTimeout(5000);
     return new Storage(config);
   }
 

@@ -3,14 +3,15 @@ package ru.brainrtp.eastereggs.services;
 import api.logging.Logger;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import ru.brainrtp.eastereggs.data.EasterEggCategory;
 import ru.brainrtp.eastereggs.data.eggs.EasterEgg;
@@ -24,14 +25,19 @@ public class PlayerEggsService {
   // an entry exists only while the player's finds are loaded; without it no egg is activated
   private final Map<UUID, Set<EggKey>> found = new ConcurrentHashMap<>();
 
+  // open connections per player: a reconnect opens the new one before the old one closes
+  private final Map<UUID, Integer> connections = new ConcurrentHashMap<>();
+
   // every storage call runs here, so writes keep their order and a load sees all earlier writes
   private final ExecutorService storageThread =
       Executors.newSingleThreadExecutor(task -> new Thread(task, "EasterEggs-Storage"));
 
-  private volatile Storage storage;
+  private final Storage storage;
+  private final Executor mainThread;
 
-  public PlayerEggsService(Storage storage) {
+  public PlayerEggsService(Storage storage, Executor mainThread) {
     this.storage = storage;
+    this.mainThread = mainThread;
   }
 
   public Set<EggKey> getPlayerData(UUID uuid) {
@@ -55,56 +61,66 @@ public class PlayerEggsService {
   }
 
   // main thread; false when the player's data is not loaded or the egg is already found
-  public boolean addEggToPlayer(UUID uuid, EasterEgg egg) {
+  public boolean addEggToPlayer(UUID uuid, EasterEgg egg, Runnable reward) {
     Set<EggKey> eggs = found.get(uuid);
     EggKey key = EggKey.of(egg);
     if (eggs == null || !eggs.add(key)) {
       return false;
     }
-    write("save " + key + " of " + uuid, s -> s.add(uuid, key), () -> {}, () -> eggs.remove(key));
+    // reward on the main thread only after the INSERT, so an unsaved find is never rewarded
+    write(
+        "save " + key + " of " + uuid,
+        s -> s.add(uuid, key),
+        () -> mainThread.execute(reward),
+        () -> eggs.remove(key));
     return true;
   }
 
+  public void addConnection(UUID uuid) {
+    connections.merge(uuid, 1, Integer::sum);
+  }
+
   public void loadPlayerData(UUID uuid) throws Exception {
-    Set<EggKey> eggs =
-        storageThread.submit(() -> read(storage, uuid)).get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
-    found.put(uuid, eggs);
+    Future<Set<EggKey>> load = storageThread.submit(() -> read(storage, uuid));
+    Set<EggKey> eggs;
+    try {
+      eggs = load.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+    } catch (Exception e) {
+      // an abandoned load must not wait in the queue behind a dead database
+      load.cancel(false);
+      throw e;
+    }
+    // a second session of the player keeps the set of the first, with finds made since the read
+    found.merge(
+        uuid,
+        eggs,
+        (old, fresh) -> {
+          old.addAll(fresh);
+          return old;
+        });
   }
 
   public void removePlayerData(UUID uuid) {
-    found.remove(uuid);
-  }
-
-  // main thread: finds happen only there, so none can slip in between the load and the swap
-  public void reload(Storage next, Collection<UUID> online) throws Exception {
-    Map<UUID, Set<EggKey>> loaded;
-    try {
-      loaded =
-          storageThread
-              .submit(() -> {
-                Map<UUID, Set<EggKey>> result = new HashMap<>();
-                for (UUID uuid : online) {
-                  result.put(uuid, read(next, uuid));
-                }
-                return result;
-              })
-              .get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
-    } catch (Exception e) {
-      next.close();
-      throw e;
-    }
-    Storage old = storage;
-    storage = next;
-    found.putAll(loaded);
-    storageThread.execute(old::close);
+    // atomic with addConnection, so a login racing the last close loads after the entry is gone
+    connections.computeIfPresent(
+        uuid,
+        (id, count) -> {
+          if (count > 1) {
+            return count - 1;
+          }
+          found.remove(id);
+          return null;
+        });
   }
 
   public void removePlayerEgg(UUID uuid, EasterEgg egg) {
     EggKey key = EggKey.of(egg);
+    List<EggKey> cached =
+        found.getOrDefault(uuid, Set.of()).contains(key) ? List.of(key) : List.of();
     write(
         "remove " + key + " of " + uuid,
         s -> s.removePlayerEgg(uuid, key),
-        () -> forget(uuid, List.of(key)),
+        () -> forget(uuid, cached),
         () -> {});
   }
 
@@ -132,17 +148,19 @@ public class PlayerEggsService {
 
   public void deleteEgg(EasterEgg egg) {
     EggKey key = EggKey.of(egg);
-    found.values().forEach(eggs -> eggs.remove(key));
-    write("delete finds of " + key, s -> s.deleteEgg(key), () -> {}, () -> {});
+    Runnable uncache = () -> found.values().forEach(eggs -> eggs.remove(key));
+    uncache.run();
+    // again after the delete: a load that read the rows before it may have cached them since
+    write("delete finds of " + key, s -> s.deleteEgg(key), uncache, () -> {});
   }
 
   public void deleteCategory(String category) {
-    found.values().forEach(eggs -> eggs.removeIf(key -> key.category().equals(category)));
+    Runnable uncache =
+        () -> found.values().forEach(eggs -> eggs.removeIf(key -> key.category().equals(category)));
+    uncache.run();
+    // again after the delete: a load that read the rows before it may have cached them since
     write(
-        "delete finds of category " + category,
-        s -> s.deleteCategory(category),
-        () -> {},
-        () -> {});
+        "delete finds of category " + category, s -> s.deleteCategory(category), uncache, () -> {});
   }
 
   public void shutdown() {
@@ -165,7 +183,7 @@ public class PlayerEggsService {
     return eggs;
   }
 
-  // keys captured at submit time, so a find made while the delete is queued stays cached
+  // only keys that were cached at submit time, so a find made while the delete is queued stays
   private void forget(UUID uuid, Collection<EggKey> keys) {
     Set<EggKey> eggs = found.get(uuid);
     if (eggs != null) {
