@@ -17,7 +17,7 @@ public final class ActionSerializer {
     TokensProvider.registerAction("sound", TypeToken.get(ActionSound.class));
     TokensProvider.registerAction("commands", TypeToken.get(ActionCommand.class));
     TokensProvider.registerAction("firework", TypeToken.get(ActionFirework.class));
-    TokensProvider.registerEgg(EggTypes.BLOCK.getStringType(), TypeToken.get(EggBlock.class));
-    TokensProvider.registerEgg(EggTypes.ENTITY.getStringType(), TypeToken.get(EggEntity.class));
+    TokensProvider.registerEgg(EggTypes.BLOCK.name(), TypeToken.get(EggBlock.class));
+    TokensProvider.registerEgg(EggTypes.ENTITY.name(), TypeToken.get(EggEntity.class));
   }
 }

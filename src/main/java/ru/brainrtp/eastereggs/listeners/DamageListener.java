@@ -80,8 +80,6 @@ public class DamageListener implements Listener {
       Optional<EasterEgg> egg = service.getEasterEgg(target);
 
       if (egg.isPresent()) {
-        //                if(!service.getPlayerService().isCompletedEgg(player.getUniqueId(),
-        // egg.get().getCategory(), egg.get().getId())){
         if (!service.getPlayerService().isCompletedEgg(player.getUniqueId(), egg.get())) {
           egg.get().activate(player);
           return true;

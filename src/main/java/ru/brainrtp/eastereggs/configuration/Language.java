@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.Getter;
 import org.bukkit.plugin.Plugin;
 import org.spongepowered.configurate.serialize.SerializationException;
 import ru.brainrtp.eastereggs.util.text.Colors;
@@ -14,9 +13,9 @@ public class Language {
 
   private final Path path;
   private final Plugin plugin;
-  @Getter private Configuration configuration;
+  private Configuration configuration;
 
-  @Getter private String prefix;
+  private String prefix;
 
   public Language(String langCode, Path path, Plugin plugin) throws IOException {
     this.path = path;

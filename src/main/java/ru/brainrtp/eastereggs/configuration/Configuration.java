@@ -3,14 +3,11 @@ package ru.brainrtp.eastereggs.configuration;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.concurrent.Callable;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.plugin.Plugin;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
@@ -104,21 +101,6 @@ public final class Configuration {
 
   public CommentedConfigurationNode get() {
     return this.node;
-  }
-
-  private @Nullable Callable<BufferedReader> getReader(String root, String fileName)
-      throws IOException {
-    Path filePath = Paths.get(root, fileName);
-
-    if (!Files.exists(filePath)) {
-      InputStream stream = getClass().getResourceAsStream("/" + fileName);
-
-      if (stream == null) throw new FileNotFoundException("Cannot find settings resource file");
-
-      Files.copy(stream, filePath);
-    }
-
-    return (Callable<BufferedReader>) Files.newBufferedReader(filePath);
   }
 
   public static TypeSerializerCollection getSerializers() {

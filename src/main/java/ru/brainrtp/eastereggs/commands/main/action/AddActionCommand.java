@@ -93,13 +93,11 @@ public class AddActionCommand extends Command {
         player.sendMessage(language.getSingleMessage("egg", "not_exist"));
       } catch (Exception e) {
         player.sendMessage(language.getSingleMessage("action", "parse", "error"));
-        return;
       }
       return;
     }
 
     player.sendMessage(language.getSingleMessage("action", "not_exist"));
-    return;
   }
 
   // same HOCON parser and serializers as the category files, so the README examples work

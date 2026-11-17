@@ -10,8 +10,6 @@ public class EggsPlaceholder extends PlaceholderExpansion {
   private final EasterEggService eggService;
 
   public EggsPlaceholder() {
-    //        super(plugin, "ee");
-
     eggService = EasterEggs.getEggService();
   }
 

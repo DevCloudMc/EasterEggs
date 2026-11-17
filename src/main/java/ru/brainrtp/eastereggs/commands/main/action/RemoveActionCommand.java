@@ -93,7 +93,6 @@ public class RemoveActionCommand extends Command {
     }
 
     player.sendMessage(language.getSingleMessage("action", "not_exist"));
-    return;
   }
 
   private int parseInt(String number) {

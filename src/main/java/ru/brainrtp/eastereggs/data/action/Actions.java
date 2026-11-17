@@ -17,8 +17,6 @@ import ru.brainrtp.eastereggs.providers.TokensProvider;
 @Data
 public class Actions implements Action {
 
-  public static final String ACTIONS_NODE = "actions";
-
   private final List<Action> localActions = new ArrayList<>();
 
   public void addAction(Action action) {

@@ -74,7 +74,6 @@ public class PlayerInteractEntityListener implements Listener {
       if (!eggOpt.isPresent()) {
         EggEntity egg = new EggEntity();
         egg.setEntityLocation(target.getLocation());
-        egg.setEntityType(target.getType());
         egg.setEntityUUID(target.getUniqueId());
 
         service.createNewEgg(category, egg);

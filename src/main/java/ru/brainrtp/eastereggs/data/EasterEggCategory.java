@@ -12,7 +12,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
-import ru.brainrtp.eastereggs.EasterEggs;
 import ru.brainrtp.eastereggs.configuration.Configuration;
 import ru.brainrtp.eastereggs.data.action.Actions;
 import ru.brainrtp.eastereggs.data.eggs.EasterEgg;
@@ -56,9 +55,6 @@ public class EasterEggCategory {
   public void addEgg(EasterEgg egg) {
     egg.setCategory(shortCategoryName);
     // TODO: (19.02 20:32) Perhaps the default message should be set?
-    //        ActionMessage messageAction = new ActionMessage();
-    //        messageAction.setMessages(List.of("Some message"));
-    //        egg.addAction(messageAction);
     eggs.put(egg.getId(), egg);
   }
 
@@ -70,24 +66,7 @@ public class EasterEggCategory {
   public void finish(Player player) {
     finishAction.activate(player);
     // TODO: (19.02 20:33) Finish it (for PAPI)
-    int founded =
-        EasterEggs.getEggService().getPlayerService().getPlayerData(player.getUniqueId()).size();
-    int count = eggs.size();
-
     // TODO: (21.02 15:10) I think this functionality (PAPI) should be added.
-    //        Placeholder ph = new Placeholder();
-    //        ph.addData(Placeholder.PLAYER, player.getName());
-    //        ph.addData(Placeholder.CATEGORY, name);
-    //        ph.addData(Placeholder.FOUNDED_EGG, founded);
-    //        ph.addData(Placeholder.EGG_COUNT, count);
-    //
-    //        for (Action action : finishAction) {
-    //            action.activate(player, ph);
-    //        }
-  }
-
-  public void clear() {
-    eggs.clear();
   }
 
   public void save() {
@@ -149,21 +128,12 @@ public class EasterEggCategory {
 
       for (EasterEgg easterEgg : easterEggCategory.getEggs().values()) {
         if (EggTypes.BLOCK.equals(easterEgg.getType())) {
-          //                        // TODO: (21.02 15:11) Should I add actions when creating a new
-          // Easter egg?
-          //                    if (easterEgg.getActions() != null) {
-          //                        for (Action action : easterEgg.getActions().getLocalActions()) {
-          //                        }
-          //                    }
+          // TODO: (21.02 15:11) Should I add actions when creating a new Easter egg?
           node.node(easterEgg.getId()).set(TypeToken.get(EggBlock.class), (EggBlock) easterEgg);
         } else {
-          //                    node.node(easterEgg.getId()).set(EggEntity.class, (EggEntity)
-          // easterEgg);
           node.node(easterEgg.getId()).set(TypeToken.get(EggEntity.class), (EggEntity) easterEgg);
         }
       }
-      //            node.node(EFFECTS_NODE).setList(TypeToken.get(FireworkEffect.class),
-      // actionFirework.getEffectList());
       node.node(FINISH_ACTION_NODE)
           .set(TypeToken.get(Actions.class), easterEggCategory.getFinishAction());
     }

@@ -22,11 +22,4 @@ public class Colors {
 
     return list;
   }
-
-  public static String[] ofArr(String[] array) {
-    for (int i = 0; i < array.length; i++) {
-      array[i] = of(array[i]);
-    }
-    return array;
-  }
 }

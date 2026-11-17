@@ -2,11 +2,9 @@ package ru.brainrtp.eastereggs;
 
 import api.logging.Logger;
 import api.logging.handlers.JULHandler;
-import java.nio.file.Path;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -27,7 +25,7 @@ import ru.brainrtp.eastereggs.services.EasterEggService;
 import ru.brainrtp.eastereggs.services.PlayerEggsService;
 import ru.brainrtp.eastereggs.storage.Storage;
 
-public class EasterEggs extends JavaPlugin implements Listener {
+public class EasterEggs extends JavaPlugin {
 
   private Configuration mainConfig;
   @Getter private static Plugin plugin;
@@ -35,16 +33,13 @@ public class EasterEggs extends JavaPlugin implements Listener {
   private EggsPlaceholder placeholder;
   @Getter private static Language language;
   @Getter private static EasterEggService eggService;
-  @Getter private static Path pluginDataFolder;
 
   @Override
   public void onEnable() {
     plugin = this;
     Logger.init(new JULHandler(getLogger()));
     Logger.info("Starting...");
-    pluginDataFolder = this.getDataFolder().toPath();
 
-    this.getServer().getPluginManager().registerEvents(this, this);
     try {
       mainConfig = new Configuration("config.conf", this.getDataFolder().toPath(), this);
       String languageFile = "lang_" + mainConfig.get().node("languageFile").getString();
@@ -53,7 +48,7 @@ public class EasterEggs extends JavaPlugin implements Listener {
       ActionSerializer.init();
       playerEggs =
           new PlayerEggsService(
-              Storage.open(mainConfig.get().node("database"), pluginDataFolder),
+              Storage.open(mainConfig.get().node("database"), getDataFolder().toPath()),
               // a disabled plugin cannot schedule: rewards of finds saved in onDisable are dropped
               task -> {
                 if (isEnabled()) {

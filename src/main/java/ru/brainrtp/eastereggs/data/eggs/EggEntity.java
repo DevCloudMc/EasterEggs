@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.bukkit.Location;
-import org.bukkit.entity.EntityType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
@@ -23,7 +22,6 @@ import ru.brainrtp.eastereggs.util.text.Colors;
 @Data
 public class EggEntity extends EasterEgg {
 
-  private EntityType entityType;
   private UUID entityUUID;
 
   private static final String ID_NODE = "id";
@@ -82,9 +80,5 @@ public class EggEntity extends EasterEgg {
         Logger.warn(Colors.of(logMessage), param, pathToWarn + param);
       }
     }
-  }
-
-  public void setEntityType(EntityType entityType) {
-    this.entityType = entityType;
   }
 }

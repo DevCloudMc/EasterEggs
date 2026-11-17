@@ -17,7 +17,6 @@ import ru.brainrtp.eastereggs.configuration.Configuration;
 import ru.brainrtp.eastereggs.configuration.Language;
 import ru.brainrtp.eastereggs.data.EasterEggCategory;
 import ru.brainrtp.eastereggs.data.EditSession;
-import ru.brainrtp.eastereggs.data.EggTypes;
 import ru.brainrtp.eastereggs.data.NamedLocation;
 import ru.brainrtp.eastereggs.data.action.ActionFirework;
 import ru.brainrtp.eastereggs.data.action.ActionMessage;
@@ -53,7 +52,7 @@ public class EasterEggService {
       throws IOException {
     this.eggsPath = Paths.get(plugin.getDataFolder() + File.separator + "eggs");
     this.language = language;
-    this.editor = new EasterEggEditor(language);
+    this.editor = new EasterEggEditor();
     this.playerEggsService = playerEggsService;
 
     if (!Files.exists(eggsPath)) {
@@ -91,41 +90,6 @@ public class EasterEggService {
 
   public static boolean isValidCategoryName(String name) {
     return CATEGORY_NAME.matcher(name).matches();
-  }
-
-  /**
-   * Get list of all eggs
-   *
-   * @return List of registered eggs
-   */
-  public List<EasterEgg> getAllEggs() {
-    List<EasterEgg> eggs = new ArrayList<>();
-
-    for (EasterEggCategory c : categories.values()) {
-      eggs.addAll(c.getEggs().values());
-    }
-
-    return eggs;
-  }
-
-  /**
-   * Get list of easter eggs with type filter
-   *
-   * @param type Registered egg type
-   * @return List of registered eggs with required type
-   */
-  public List<EasterEgg> getEggsOfType(EggTypes type) {
-    List<EasterEgg> eggs = new ArrayList<>();
-
-    for (EasterEggCategory c : categories.values()) {
-      for (EasterEgg e : c.getEggs().values()) {
-        if (type.equals(e.getType())) {
-          eggs.add(e);
-        }
-      }
-    }
-
-    return eggs;
   }
 
   public Collection<EasterEggCategory> getAllCategories() {

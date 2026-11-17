@@ -5,21 +5,17 @@ import java.util.HashMap;
 import java.util.Optional;
 import org.bukkit.entity.Player;
 import ru.brainrtp.eastereggs.EasterEggs;
-import ru.brainrtp.eastereggs.configuration.Language;
 import ru.brainrtp.eastereggs.data.eggs.EasterEgg;
 import ru.brainrtp.eastereggs.util.highlighter.Highlighter;
 import ru.brainrtp.eastereggs.util.highlighter.Highlighters;
 
 public class EditSession {
 
-  private final Language language;
-
   private final Player player;
   private final HashMap<Integer, Highlighter> highlighterMap = new HashMap<>();
   private final String category;
 
-  public EditSession(Language language, Player player, String category) {
-    this.language = language;
+  public EditSession(Player player, String category) {
     this.player = player;
     this.category = category;
   }

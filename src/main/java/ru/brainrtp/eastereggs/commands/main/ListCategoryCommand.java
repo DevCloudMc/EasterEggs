@@ -66,7 +66,7 @@ public class ListCategoryCommand extends Command {
             subTitle =
                 language
                     .getSingleMessage("egg", "list", "template")
-                    .replace("{type}", egg.getType().getStringType())
+                    .replace("{type}", egg.getType().name())
                     .replace("{id}", String.valueOf(egg.getId()));
 
             content.add(

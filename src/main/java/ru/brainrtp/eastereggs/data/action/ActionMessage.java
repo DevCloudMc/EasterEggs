@@ -48,24 +48,13 @@ public class ActionMessage implements Action {
       if (messages != null) {
         for (String str : messages) {
           // TODO: (21.02 15:8) I think this functionality (PAPI) should be added.
-          //                String line = HandlersProvider.getPlaceholderHandler().replace(player,
-          // str);
-          //                player.sendMessage(line);
           player.sendMessage(Colors.component(str));
         }
       }
 
       if (actionBar != null) {
-        //                String actionBarReplaced =
-        // HandlersProvider.getPlaceholderHandler().replace(player, actionbar);
-        String actionBarReplaced = actionBar;
-        player.sendActionBar(Colors.component(actionBarReplaced));
+        player.sendActionBar(Colors.component(actionBar));
       }
-
-      //            String title = HandlersProvider.getPlaceholderHandler().replace(player,
-      // this.title);
-      //            String subtitle = HandlersProvider.getPlaceholderHandler().replace(player,
-      // this.subtitle);
 
       if (title != null || subtitle != null)
         player.showTitle(
@@ -84,9 +73,6 @@ public class ActionMessage implements Action {
     public ActionMessage deserialize(Type type, ConfigurationNode node)
         throws SerializationException {
       ActionMessage actionMessage = new ActionMessage();
-      //            String asv =
-      // Arrays.stream(node.path().array()).map(Object::toString).collect(Collectors.joining("."));
-
       if (node.node(MESSAGES_NODE).isNull()) {
         actionMessage.setMessages(null);
       } else if (node.node(MESSAGES_NODE).isList()) {
