@@ -1,9 +1,20 @@
-# EasterEggs3.0
+# EasterEggs 4.0.0
 
 This plugin allows you to create easter eggs (blocks, entities, ~~NPC~~). By clicking  
 them u can run various actions and events.
 
+## Requirements
+
+EasterEggs 4.0.0 runs on Paper 26.3 with Java 25 and does not support older servers. Vault (or VaultUnlocked) and PlaceholderAPI are optional. Found eggs are stored in SQLite by default or in PostgreSQL, see Installation.
+
+Breaking changes from 3.0:
+- MySQL support is removed and its data is not migrated.
+- Category names are limited to latin letters, digits, `_` and `-`, up to 32 characters.
+- Highlights, holograms and messages use the Paper API instead of packets, so ProtocolLib and GlowAPI are no longer needed.
+
 ## Installation
+
+Optional: [VaultUnlocked](https://github.com/TheNewEconomy/VaultUnlocked) 2.20.3 (or Vault) is needed for the `money` action, PlaceholderAPI 2.12.3 is needed for the placeholders below.
 
 Copy the **.jar** file to your plugins folder. Run the server. 
 Now, go to the **config.conf**.  
@@ -11,10 +22,11 @@ You will see the following:
 
 ```kotlin
 database {
-  type: "MySQL" // Available types: MySQL
+  type: "sqlite" // sqlite or postgresql
+  // The keys below are used only by postgresql
   host: "localhost"
+  port: 5432
   database: "eastereggs"
-  port: 3306
   user: "eastereggs"
   password: "123123"
 }
@@ -22,10 +34,16 @@ database {
 languageFile = "en"
 ```
 
+`sqlite` is the default and needs no setup: found eggs are kept in `plugins/EasterEggs/eastereggs.db`. With `postgresql` the plugin connects to the server from the keys above. Paper downloads HikariCP and the PostgreSQL driver on the first start, whatever the type. Any other `type` disables the plugin with an error in the log. If the database cannot be opened at startup, the plugin disables itself instead of running without saving finds. A change to the `database` block takes effect only after a server restart, `/ee reload` does not reopen the database.
+
+Breaking change in 4.0.0: MySQL support is removed and data from an existing MySQL database is not migrated, so players start with no found eggs. Set `type` to `sqlite` or `postgresql` before the first start.
+
 To get help about the plugin type `/ee help`.
 
 ## Categories
-To create a new group type `/ee category create <category_name>`.
+To create a new group type `/ee category create <category_name>`. The name may contain only latin letters, digits, `_` and `-`, up to 32 characters.
+
+Each category is kept in its own file in `plugins/EasterEggs/eggs/`. If a file cannot be read, the log names the file and the reason, and the other categories still load.
 
 To delete any category type `/ee category delete <category_name>`. If easter eggs from this category were already found by someone
 they will be deleted from the database.
@@ -51,21 +69,21 @@ Easter eggs actions are adding in edit mode. To add an action just type
 `money` - Gives any amount of money  
 `firework` - Launching a firework  
 
-Those actions are in the json format. Data depends on the variables of 
+Action data is HOCON (plain JSON works too), the same format as in the category files, and may contain spaces. Data depends on the variables of 
 specified action. E.g. `message` action can take the following variables:
 
 #### message
 `messages` - List of messages displaying in the chat. That's how it looks in  
 json - {messages:["Message 1", "Message 2"]}  
 `title` - Title message  
-`subtitle`- Subtitle message  
-`actionbar` - Actionbar message  
+`subTitle`- Subtitle message (`subtitle` in the json of `/ee action add`)  
+`actionBar` - Actionbar message  
 `fadeIn` - Title fade in period in ticks (1 second = 20 ticks)  | Default 10 ticks
 `fadeOut` - Title fade out period in ticks | Default 10 ticks
 `stay` - Delay period before fade out starts in ticks | Default 30 ticks
 
 For example, if u want to display something in actionbar, you should type:  
-`/ee action add <egg_id> message {actionbar:"Hello, world!"}`  
+`/ee action add <egg_id> message {actionBar:"Hello, world!"}`  
 or  
 `/ee action add <egg_id> message {messages=["&eFirst", "&cSecond"]}`
 
@@ -75,7 +93,7 @@ Here is the list of all actions' variables.
 `console` - Commands list. Specifies whether run a command by console  
 `player` - Commands list. Specifies whether run a command by player  
 Example:  
-`/ee action add <egg_id> commands {player=["/home", "/say Hello"] console=["broadcast Hi!"]}` 
+`/ee action add <egg_id> commands {player=["/home", "/say Hello"], console=["broadcast Hi!"]}` 
 
 #### sound
 `type` - Sound name. Here you can find all of them: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Sound.html   
@@ -88,7 +106,7 @@ Example:
 #### money
 `money` - Amount of money given to the player 
 Example:  
-At the moment, the team is not working properly.  
+`/ee action add <egg_id> money {money:100}`  
 
 #### firework
 `power` - Distance. 0 by default (~4-5 blocks)  
@@ -122,9 +140,11 @@ Here is an example with each type of easter eggs and actions:
 
 ```kotlin
 title="example"
+category="example"
 hidePlayerData=false
 
 "0"{
+    id=0
     location="world, 0.0, 0.0, 0.0"
     type="BLOCK"
     actions{
@@ -151,13 +171,13 @@ hidePlayerData=false
                 "..."
             ]
             title="Title text"
-            subtitle="subtitle text"
-            actionbar="Actionbar text"
+            subTitle="subtitle text"
+            actionBar="Actionbar text"
             fadeIn=10
             stay=40
             fadeOut=10
         }
-        command{
+        commands{
             console:[
                 "ban %player%",
                 "time set 0"
@@ -180,11 +200,11 @@ hidePlayerData=false
 
 ...
 
-onFinish{
+finishAction{
     sound="UI_TOAST_CHALLENGE_COMPLETE"
     message{
         title="Congratulations!"
-        subtitle="You found them all!"
+        subTitle="You found them all!"
         fadeIn=10
         fadeOut=10
         stay=50

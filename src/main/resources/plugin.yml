@@ -1,0 +1,14 @@
+name: EasterEggs
+version: '${version}'
+main: ru.brainrtp.eastereggs.EasterEggs
+api-version: '26.3'
+author: BrainRTP
+softdepend: [Vault, PlaceholderAPI]
+libraries:
+  - org.spongepowered:configurate-hocon:4.2.0
+  - com.zaxxer:HikariCP:7.1.0
+  - org.postgresql:postgresql:42.7.14
+commands:
+  eastereggs:
+    description: EasterEggs command
+    aliases: [ee]
