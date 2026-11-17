@@ -15,11 +15,11 @@ import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
 import ru.brainrtp.eastereggs.data.EggTypes;
+import ru.brainrtp.eastereggs.data.NamedLocation;
 import ru.brainrtp.eastereggs.data.action.Actions;
 import ru.brainrtp.eastereggs.util.text.Colors;
 
-// TODO: (20.02 0:20) check this annotation work
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 @Data
 public class EggEntity extends EasterEgg {
 
@@ -37,7 +37,7 @@ public class EggEntity extends EasterEgg {
   }
 
   public void setEntityLocation(Location location) {
-    setLocation(location);
+    setLocation(NamedLocation.of(location));
   }
 
   public static class Serializer implements TypeSerializer<EggEntity> {
@@ -48,8 +48,7 @@ public class EggEntity extends EasterEgg {
       paramMustBeExist(node, ID_NODE);
       eggEntity.setId(node.node(ID_NODE).getInt());
 
-      paramMustBeExist(node, LOCATION_NODE);
-      eggEntity.setLocation(node.node(LOCATION_NODE).get(Location.class));
+      eggEntity.setLocation(node.node(LOCATION_NODE).require(NamedLocation.class));
 
       eggEntity.setActions(node.node(ACTIONS_NODE).get(Actions.class));
       eggEntity.setEntityUUID(UUID.fromString(node.node(ENTITY_UUID_NODE).getString()));
@@ -62,7 +61,7 @@ public class EggEntity extends EasterEgg {
       // TODO: (21.02 15:10) Add additional checks
       node.node(ID_NODE).set(eggEntity.getId());
       node.node(TYPE_NODE).set(eggEntity.getType().toString());
-      node.node(LOCATION_NODE).set(TypeToken.get(Location.class), eggEntity.getLocation());
+      node.node(LOCATION_NODE).set(NamedLocation.class, eggEntity.getLocation());
       node.node(ACTIONS_NODE).set(TypeToken.get(Actions.class), eggEntity.getActions());
       node.node(ENTITY_UUID_NODE).set(eggEntity.getEntityUUID().toString());
     }

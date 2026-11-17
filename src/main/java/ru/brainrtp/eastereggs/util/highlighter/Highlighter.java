@@ -31,7 +31,10 @@ public class Highlighter {
   }
 
   private void startBlock(EasterEgg easterEgg, Player player) {
-    Location location = easterEgg.getLocation();
+    Location location = easterEgg.getLocation().toLocation();
+    if (location == null) {
+      return;
+    }
     BlockDisplay block =
         location
             .getWorld()
@@ -50,7 +53,11 @@ public class Highlighter {
   }
 
   private void startEntity(EggEntity easterEgg, Player player) {
-    Location location = easterEgg.getLocation().clone().add(0, 0.2, 0);
+    Location location = easterEgg.getLocation().toLocation();
+    if (location == null) {
+      return;
+    }
+    location.add(0, 0.2, 0);
     glowingEntity = Bukkit.getEntity(easterEgg.getEntityUUID());
     if (glowingEntity != null) {
       glowingEntity.setGlowing(true);

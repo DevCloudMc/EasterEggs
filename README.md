@@ -32,7 +32,9 @@ Breaking change in 4.0.0: MySQL support is removed and data from an existing MyS
 To get help about the plugin type `/ee help`.
 
 ## Categories
-To create a new group type `/ee category create <category_name>`.
+To create a new group type `/ee category create <category_name>`. The name may contain only latin letters, digits, `_` and `-`, up to 32 characters.
+
+Each category is kept in its own file in `plugins/EasterEggs/eggs/`. If a file cannot be read, the log names the file and the reason, and the other categories still load.
 
 To delete any category type `/ee category delete <category_name>`. If easter eggs from this category were already found by someone
 they will be deleted from the database.
@@ -65,14 +67,14 @@ specified action. E.g. `message` action can take the following variables:
 `messages` - List of messages displaying in the chat. That's how it looks in  
 json - {messages:["Message 1", "Message 2"]}  
 `title` - Title message  
-`subtitle`- Subtitle message  
-`actionbar` - Actionbar message  
+`subTitle`- Subtitle message (`subtitle` in the json of `/ee action add`)  
+`actionBar` - Actionbar message  
 `fadeIn` - Title fade in period in ticks (1 second = 20 ticks)  | Default 10 ticks
 `fadeOut` - Title fade out period in ticks | Default 10 ticks
 `stay` - Delay period before fade out starts in ticks | Default 30 ticks
 
 For example, if u want to display something in actionbar, you should type:  
-`/ee action add <egg_id> message {actionbar:"Hello, world!"}`  
+`/ee action add <egg_id> message {actionBar:"Hello, world!"}`  
 or  
 `/ee action add <egg_id> message {messages=["&eFirst", "&cSecond"]}`
 
@@ -95,7 +97,7 @@ Example:
 #### money
 `money` - Amount of money given to the player 
 Example:  
-At the moment, the team is not working properly.  
+`/ee action add <egg_id> money {money:100}`  
 
 #### firework
 `power` - Distance. 0 by default (~4-5 blocks)  
@@ -129,9 +131,11 @@ Here is an example with each type of easter eggs and actions:
 
 ```kotlin
 title="example"
+category="example"
 hidePlayerData=false
 
 "0"{
+    id=0
     location="world, 0.0, 0.0, 0.0"
     type="BLOCK"
     actions{
@@ -158,13 +162,13 @@ hidePlayerData=false
                 "..."
             ]
             title="Title text"
-            subtitle="subtitle text"
-            actionbar="Actionbar text"
+            subTitle="subtitle text"
+            actionBar="Actionbar text"
             fadeIn=10
             stay=40
             fadeOut=10
         }
-        command{
+        commands{
             console:[
                 "ban %player%",
                 "time set 0"
@@ -187,11 +191,11 @@ hidePlayerData=false
 
 ...
 
-onFinish{
+finishAction{
     sound="UI_TOAST_CHALLENGE_COMPLETE"
     message{
         title="Congratulations!"
-        subtitle="You found them all!"
+        subTitle="You found them all!"
         fadeIn=10
         fadeOut=10
         stay=50

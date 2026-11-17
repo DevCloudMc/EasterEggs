@@ -69,7 +69,7 @@ public class PlayerInteractEntityListener implements Listener {
     if (service.getEditor().isEditMode(player.getUniqueId())) {
       // Right click, create entity egg
       String category = service.getEditor().getEditCategory(player.getUniqueId());
-      Optional<EasterEgg> eggOpt = service.getEasterEgg(target.getLocation());
+      Optional<EasterEgg> eggOpt = service.getEasterEgg(target);
 
       if (!eggOpt.isPresent()) {
         EggEntity egg = new EggEntity();
@@ -91,7 +91,7 @@ public class PlayerInteractEntityListener implements Listener {
     }
 
     // Activate egg
-    Optional<EasterEgg> egg = service.getEasterEgg(target.getLocation());
+    Optional<EasterEgg> egg = service.getEasterEgg(target);
 
     if (egg.isPresent()) {
       if (!service.getPlayerService().isCompletedEgg(player.getUniqueId(), egg.get())) {

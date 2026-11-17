@@ -1,24 +1,27 @@
 package ru.brainrtp.eastereggs.data.eggs;
 
 import lombok.Data;
-import org.bukkit.Location;
+import lombok.EqualsAndHashCode;
 import org.bukkit.entity.Player;
 import ru.brainrtp.eastereggs.EasterEggs;
 import ru.brainrtp.eastereggs.data.EggTypes;
+import ru.brainrtp.eastereggs.data.NamedLocation;
 import ru.brainrtp.eastereggs.data.action.Action;
 import ru.brainrtp.eastereggs.data.action.Actions;
 import ru.brainrtp.eastereggs.services.EasterEggService;
 
+// same identity as EggKey in storage
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Data
 public abstract class EasterEgg {
 
-  private int id;
+  @EqualsAndHashCode.Include private int id;
 
-  private String category;
+  @EqualsAndHashCode.Include private String category;
 
   private EggTypes type;
 
-  private Location location;
+  private NamedLocation location;
 
   private Actions actions;
 
@@ -26,6 +29,8 @@ public abstract class EasterEgg {
     if (actions == null) {
       actions = new Actions();
     }
+    // actions are saved under their type name, so a second one of a type would overwrite the first
+    actions.removeAction(action.getActionTitle());
     actions.addAction(action);
   }
 

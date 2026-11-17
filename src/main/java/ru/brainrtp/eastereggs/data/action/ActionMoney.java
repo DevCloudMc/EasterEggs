@@ -55,9 +55,11 @@ public class ActionMoney implements Action {
     public ActionMoney deserialize(Type type, ConfigurationNode node)
         throws SerializationException {
       ActionMoney actionMoney = new ActionMoney();
-      if (!node.isNull()) {
-        paramMustBeAnFloat(node, MONEY_NODE);
-        actionMoney.setMoney(node.getFloat());
+      // 3.0 saved the amount as money { money = N }
+      ConfigurationNode amount = node.isMap() ? node.node(MONEY_NODE) : node;
+      if (!amount.isNull()) {
+        paramMustBeAnFloat(amount, MONEY_NODE);
+        actionMoney.setMoney(amount.getFloat());
       }
       return actionMoney;
     }
@@ -65,7 +67,7 @@ public class ActionMoney implements Action {
     @Override
     public void serialize(Type type, @Nullable ActionMoney actionMoney, ConfigurationNode node)
         throws SerializationException {
-      node.node(MONEY_NODE).set(actionMoney.getMoney());
+      node.set(actionMoney.getMoney());
     }
 
     private void paramMustBeAnFloat(ConfigurationNode node, String param) {

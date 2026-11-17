@@ -1,118 +1,46 @@
 package ru.brainrtp.eastereggs.serializer;
 
-import api.logging.Logger;
 import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
-import ru.brainrtp.eastereggs.util.text.Colors;
+import ru.brainrtp.eastereggs.data.NamedLocation;
 
-public class LocationSerializer implements TypeSerializer<Location> {
-
-  @Override
-  public Location deserialize(Type type, ConfigurationNode node) throws SerializationException {
-    String world = "";
-    double x = 0.0d;
-    double y = 0.0d;
-    double z = 0.0d;
-
-    String[] args = Objects.requireNonNull(node.getString()).split(",");
-
-    if (args[0] != null) {
-      if (Bukkit.getWorld(args[0]) == null)
-        paramWorldIsNull(node, args[0].trim(), " 'world' value");
-      world = args[0].trim();
-    }
-
-    if (args[1] != null) {
-      try {
-        x = parseDouble(args[1].trim());
-      } catch (NumberFormatException e) {
-        paramMustBeAnDouble(node, "'x' coordinate");
-        x = 0.0;
-      }
-    }
-
-    if (args[2] != null) {
-      try {
-        y = parseDouble(args[2].trim());
-      } catch (NumberFormatException e) {
-        paramMustBeAnDouble(node, "'y' coordinate");
-        y = 0.0;
-      }
-    }
-
-    if (args[3] != null) {
-      try {
-        z = parseDouble(args[3].trim());
-      } catch (NumberFormatException e) {
-        paramMustBeAnDouble(node, "'z' coordinate");
-        z = 0.0;
-      }
-    }
-
-    return new Location(Bukkit.getWorld(world), x, y, z);
-  }
+public class LocationSerializer implements TypeSerializer<NamedLocation> {
 
   @Override
-  public void serialize(Type type, @Nullable Location location, ConfigurationNode node)
+  public NamedLocation deserialize(Type type, ConfigurationNode node)
       throws SerializationException {
-    String format = "%s, %s, %s, %s";
-    String loc;
-    if (location != null) {
-      loc =
-          String.format(
-              format,
-              location.getWorld().getName(),
-              parseDouble(location.getX()),
-              parseDouble(location.getY()),
-              parseDouble(location.getZ()));
-    } else {
-      loc = String.format(format, "null", 0, 0, 0);
+    String value = node.getString("");
+    String[] args = value.split(",");
+    // older files may carry yaw and pitch after z, they are ignored
+    if (args.length < 4) {
+      throw badValue(node, type, value);
     }
-
-    node.set(loc);
+    try {
+      return new NamedLocation(
+          args[0].trim(),
+          Double.parseDouble(args[1].trim()),
+          Double.parseDouble(args[2].trim()),
+          Double.parseDouble(args[3].trim()));
+    } catch (NumberFormatException e) {
+      throw badValue(node, type, value);
+    }
   }
 
-  private double parseDouble(String str) {
-    return Double.parseDouble(str);
+  @Override
+  public void serialize(Type type, @Nullable NamedLocation location, ConfigurationNode node)
+      throws SerializationException {
+    if (location == null) {
+      node.raw(null);
+      return;
+    }
+    node.set(location.world() + ", " + location.x() + ", " + location.y() + ", " + location.z());
   }
 
-  private String parseDouble(double num) {
-    return String.valueOf(num).replace(",", ".");
-  }
-
-  private void paramWorldIsNull(ConfigurationNode node, String world, String param) {
-
-    String pathToWarn =
-        Arrays.stream(node.path().array()).map(Object::toString).collect(Collectors.joining("."));
-
-    String logMessage =
-        """
-        &fWorld &e''{0}''&r not found. Setting the default value to &e'null'&r
-        Full path to this param - &e{1}&r\
-        """;
-    Logger.warn(Colors.of(logMessage), world, pathToWarn + param);
-  }
-
-  private void paramMustBeAnDouble(ConfigurationNode node, String param) {
-    String pathToWarn =
-        Arrays.stream(node.path().array())
-            .map(Object::toString)
-            .collect(Collectors.joining("."))
-            .concat(".");
-
-    String logMessage =
-        """
-        &fThe &e{0}&r parameter must be an double. Setting the default value to &e0.0&r
-        Full path to this param - &e{1}&r\
-        """;
-    Logger.warn(Colors.of(logMessage), param, pathToWarn + param);
+  private static SerializationException badValue(ConfigurationNode node, Type type, String value) {
+    return new SerializationException(
+        node, type, "expected \"world, x, y, z\", got \"" + value + "\"");
   }
 }

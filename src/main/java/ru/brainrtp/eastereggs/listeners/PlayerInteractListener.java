@@ -78,7 +78,8 @@ public class PlayerInteractListener implements Listener {
 
         // Remove block egg
         Location location = event.getClickedBlock().getLocation();
-        Optional<EasterEgg> egg = service.getCategory(category).get().getEggByLocation(location);
+        Optional<EasterEgg> egg =
+            service.getEasterEgg(location).filter(e -> e.getCategory().equals(category));
 
         if (egg.isPresent()) {
           service.deleteEgg(category, egg.get());

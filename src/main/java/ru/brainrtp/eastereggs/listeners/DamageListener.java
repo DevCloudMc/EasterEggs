@@ -2,7 +2,6 @@ package ru.brainrtp.eastereggs.listeners;
 
 import java.util.Optional;
 import org.bukkit.GameMode;
-import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -27,7 +26,7 @@ public class DamageListener implements Listener {
 
   @EventHandler
   public void onEntityDamage(EntityDamageEvent event) {
-    Optional<EasterEgg> egg = service.getEasterEgg(event.getEntity().getLocation());
+    Optional<EasterEgg> egg = service.getEasterEgg(event.getEntity());
 
     if (egg.isPresent()) {
       event.setDamage(0);
@@ -62,8 +61,8 @@ public class DamageListener implements Listener {
       if (service.getEditor().isEditMode(player.getUniqueId())) {
         // Delete egg
         String category = service.getEditor().getEditCategory(player.getUniqueId());
-        Location location = target.getLocation();
-        Optional<EasterEgg> egg = service.getCategory(category).get().getEggByLocation(location);
+        Optional<EasterEgg> egg =
+            service.getEasterEgg(target).filter(e -> e.getCategory().equals(category));
 
         if (egg.isPresent()) {
           service.deleteEgg(category, egg.get());
@@ -78,7 +77,7 @@ public class DamageListener implements Listener {
       }
 
       // Activate egg
-      Optional<EasterEgg> egg = service.getEasterEgg(target.getLocation());
+      Optional<EasterEgg> egg = service.getEasterEgg(target);
 
       if (egg.isPresent()) {
         //                if(!service.getPlayerService().isCompletedEgg(player.getUniqueId(),

@@ -1,12 +1,12 @@
 package ru.brainrtp.eastereggs.data;
 
+import api.logging.Logger;
 import io.leangen.geantyref.TypeToken;
 import java.lang.reflect.Type;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.Data;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -14,7 +14,6 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
 import ru.brainrtp.eastereggs.EasterEggs;
 import ru.brainrtp.eastereggs.configuration.Configuration;
-import ru.brainrtp.eastereggs.data.action.Action;
 import ru.brainrtp.eastereggs.data.action.Actions;
 import ru.brainrtp.eastereggs.data.eggs.EasterEgg;
 import ru.brainrtp.eastereggs.data.eggs.EggBlock;
@@ -30,7 +29,8 @@ public class EasterEggCategory {
   private Configuration config;
   private boolean hidePlayerData = false;
 
-  private final Map<Integer, EasterEgg> eggs = new HashMap<>();
+  // PlaceholderAPI reads it from its own thread
+  private final Map<Integer, EasterEgg> eggs = new ConcurrentHashMap<>();
   private Actions finishAction;
 
   private static final String TITLE_NODE = "title";
@@ -53,16 +53,6 @@ public class EasterEggCategory {
     return Optional.ofNullable(eggs.get(id));
   }
 
-  public Optional<EasterEgg> getEggByLocation(Location loc) {
-    for (EasterEgg egg : eggs.values()) {
-      if (egg.getLocation().equals(loc)) {
-        return Optional.of(egg);
-      }
-    }
-
-    return Optional.empty();
-  }
-
   public void addEgg(EasterEgg egg) {
     egg.setCategory(shortCategoryName);
     // TODO: (19.02 20:32) Perhaps the default message should be set?
@@ -73,18 +63,8 @@ public class EasterEggCategory {
   }
 
   public void removeEgg(EasterEgg egg) {
-
-    if (config != null) {
-      eggs.remove(egg.getId());
-      try {
-        // TODO: (17.02 14:41) kludge :(
-        config.get().set(null);
-        config.get().set(this);
-      } catch (SerializationException e) {
-        e.printStackTrace();
-      }
-      config.save();
-    }
+    eggs.remove(egg.getId());
+    save();
   }
 
   public void finish(Player player) {
@@ -112,13 +92,14 @@ public class EasterEggCategory {
 
   public void save() {
     try {
-      // TODO: (19.02 20:33) I think it's kludge :(
+      // cleared first, otherwise removed eggs and actions stay in the node
       config.get().set(null);
       config.get().set(this);
-      config.save();
     } catch (SerializationException e) {
-      e.printStackTrace();
+      Logger.error("Could not save category {0}, the file is left as it was", e, shortCategoryName);
+      return;
     }
+    config.save();
   }
 
   public static class Serializer implements TypeSerializer<EasterEggCategory> {
@@ -139,6 +120,10 @@ public class EasterEggCategory {
 
         String typeStr = child.node(TYPE_NODE).getString();
         TypeToken<? extends EasterEgg> eggType = TokensProvider.getEggType(typeStr);
+        if (eggType == null) {
+          Logger.warn("Unknown egg type {0} skipped, path {1}", typeStr, child.path());
+          continue;
+        }
 
         EasterEgg egg = child.get(eggType);
         egg.setCategory(node.node(CATEGORY_NODE).getString());
@@ -146,19 +131,8 @@ public class EasterEggCategory {
         category.addEgg(egg);
       }
 
-      Actions actions = new Actions();
-
-      for (ConfigurationNode child : node.node(FINISH_ACTION_NODE).childrenMap().values()) {
-        String actionName = child.key().toString();
-        TypeToken<? extends Action> actionType = TokensProvider.getActionType(actionName);
-
-        Action action = child.get(actionType);
-
-        actions.addAction(action);
-      }
-
       category.setTitle(node.node(TITLE_NODE).getString());
-      category.setFinishAction(actions);
+      category.setFinishAction(node.node(FINISH_ACTION_NODE).get(Actions.class, new Actions()));
 
       return category;
     }

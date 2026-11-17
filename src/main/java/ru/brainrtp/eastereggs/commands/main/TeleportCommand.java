@@ -3,6 +3,7 @@ package ru.brainrtp.eastereggs.commands.main;
 import java.util.List;
 import java.util.Optional;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -58,8 +59,14 @@ public class TeleportCommand extends Command {
       Optional<EasterEgg> egg = category.get().getEgg(id);
 
       if (egg.isPresent()) {
+        Location location = egg.get().getLocation().toLocation();
+        if (location == null) {
+          player.sendMessage(
+              Colors.of("&cWorld &e" + egg.get().getLocation().world() + " &cis not loaded"));
+          return;
+        }
         player.setGameMode(GameMode.SPECTATOR);
-        player.teleport(egg.get().getLocation());
+        player.teleport(location);
         createTempHighlight(Highlighters.create(egg.get(), player), player);
         return;
       }

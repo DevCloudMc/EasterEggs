@@ -1,7 +1,6 @@
 package ru.brainrtp.eastereggs.data.action;
 
 import api.logging.Logger;
-import io.leangen.geantyref.TypeToken;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -15,6 +14,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
+import ru.brainrtp.eastereggs.data.NamedLocation;
 import ru.brainrtp.eastereggs.util.text.Colors;
 
 @Data
@@ -23,7 +23,7 @@ public class ActionSound implements Action {
   private static final String ACTION_NAME = "sound";
   // TODO: 26.11.2021 Add another option to make `sound: <Type>`, not just `sound { <...> }`
   private Sound sound;
-  private Location location;
+  private NamedLocation location;
   private float pitch = 1.0F;
   private float volume = 1.0F;
 
@@ -39,8 +39,9 @@ public class ActionSound implements Action {
 
   @Override
   public void activate(Player player) {
-    Location newLocation = this.location == null ? player.getLocation() : this.location;
-    player.playSound(newLocation, sound, volume, pitch);
+    Location newLocation = this.location == null ? null : this.location.toLocation();
+    player.playSound(
+        newLocation == null ? player.getLocation() : newLocation, sound, volume, pitch);
   }
 
   public static class Serializer implements TypeSerializer<ActionSound> {
@@ -84,7 +85,7 @@ public class ActionSound implements Action {
       }
 
       if (!node.node(LOCATION_NODE).isNull()) {
-        actionSound.setLocation(node.node(LOCATION_NODE).get(Location.class));
+        actionSound.setLocation(node.node(LOCATION_NODE).get(NamedLocation.class));
       }
 
       return actionSound;
@@ -96,7 +97,7 @@ public class ActionSound implements Action {
       if (actionSound.getSound() != null)
         node.node(TYPE_NODE).set(Registry.SOUNDS.getKey(actionSound.getSound()).value());
       if (actionSound.getLocation() != null)
-        node.node(LOCATION_NODE).set(TypeToken.get(Location.class), actionSound.getLocation());
+        node.node(LOCATION_NODE).set(NamedLocation.class, actionSound.getLocation());
 
       node.node(PITCH_NODE).set(actionSound.getPitch());
       node.node(VOLUME_NODE).set(actionSound.getVolume());
@@ -120,8 +121,7 @@ public class ActionSound implements Action {
     }
 
     private void paramMustBeAnFloatOrInteger(ConfigurationNode node, String param) {
-      if (!(node.node(param).raw() instanceof Float)
-          || !(node.node(param).raw() instanceof Integer)) {
+      if (!(node.node(param).raw() instanceof Number)) {
         String pathToWarn =
             Arrays.stream(node.path().array())
                 .map(Object::toString)

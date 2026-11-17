@@ -16,7 +16,7 @@ public class CreateCategoryCommand extends Command {
   public CreateCategoryCommand(Language language, EasterEggService eggService) {
     this.language = language;
     this.eggService = eggService;
-    setUsage(Colors.of("&e/ee category create <name>"));
+    setUsage(Colors.of("&e/ee category create <name> &7(A-Z, a-z, 0-9, _ and -, up to 32)"));
   }
 
   @Override
@@ -24,6 +24,11 @@ public class CreateCategoryCommand extends Command {
     if (sender instanceof Player player) {
       if (args.length != 1) {
         player.sendMessage(language.getSingleMessage("errors", "forgot", "name"));
+        return;
+      }
+
+      if (!EasterEggService.isValidCategoryName(args[0])) {
+        player.sendMessage(getUsage());
         return;
       }
 

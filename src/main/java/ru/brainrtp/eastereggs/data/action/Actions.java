@@ -57,9 +57,13 @@ public class Actions implements Action {
       Actions actions = new Actions();
 
       for (ConfigurationNode value : node.childrenMap().values()) {
-        TypeToken<? extends Action> typeToken = TokensProvider.getActionType((String) value.key());
-        Action action = value.get(typeToken);
-        actions.addAction(action);
+        TypeToken<? extends Action> typeToken =
+            TokensProvider.getActionType(String.valueOf(value.key()));
+        if (typeToken == null) {
+          Logger.warn("Unknown action {0} skipped, path {1}", value.key(), value.path());
+          continue;
+        }
+        actions.addAction(value.get(typeToken));
       }
 
       return actions;

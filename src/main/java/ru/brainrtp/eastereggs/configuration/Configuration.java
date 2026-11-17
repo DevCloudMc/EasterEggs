@@ -9,7 +9,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
-import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.CommentedConfigurationNode;
@@ -17,6 +16,7 @@ import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.serialize.TypeSerializerCollection;
 import ru.brainrtp.eastereggs.data.EasterEggCategory;
+import ru.brainrtp.eastereggs.data.NamedLocation;
 import ru.brainrtp.eastereggs.data.action.*;
 import ru.brainrtp.eastereggs.data.eggs.EggBlock;
 import ru.brainrtp.eastereggs.data.eggs.EggEntity;
@@ -29,6 +29,7 @@ public final class Configuration {
   private CommentedConfigurationNode node;
   private final HoconConfigurationLoader loader;
   @Getter @Setter private String fileName;
+  @Getter private final Path path;
 
   /**
    * Create empty .conf file in directory, or load if file already exist
@@ -39,7 +40,8 @@ public final class Configuration {
   public Configuration(String fileName, Path directory) throws IOException {
     setFileName(fileName);
     ConfigurationOptions options = ConfigurationOptions.defaults().serializers(getSerializers());
-    File file = Paths.get(directory.toString() + File.separator + fileName).toFile();
+    path = directory.resolve(fileName);
+    File file = path.toFile();
     loader = HoconConfigurationLoader.builder().file(file).defaultOptions(options).build();
 
     if (!Files.exists(directory)) {
@@ -62,7 +64,8 @@ public final class Configuration {
    */
   public Configuration(String fileName, Path directory, Plugin plugin) throws IOException {
     setFileName(fileName);
-    File file = Paths.get(directory.toString() + File.separator + fileName).toFile();
+    path = directory.resolve(fileName);
+    File file = path.toFile();
     loader = HoconConfigurationLoader.builder().file(file).build();
 
     if (Files.notExists(directory)) {
@@ -70,11 +73,12 @@ public final class Configuration {
     }
 
     if (Files.notExists(file.toPath())) {
-      InputStream stream = plugin.getClass().getResourceAsStream("/" + fileName);
-      if (stream == null) {
-        throw new FileNotFoundException("Cannot find settings resource file");
+      try (InputStream stream = plugin.getClass().getResourceAsStream("/" + fileName)) {
+        if (stream == null) {
+          throw new FileNotFoundException("Cannot find settings resource file");
+        }
+        Files.copy(stream, file.toPath());
       }
-      Files.copy(stream, file.toPath());
     }
 
     load();
@@ -131,7 +135,7 @@ public final class Configuration {
         .register(EggBlock.class, new EggBlock.Serializer())
         .register(FireworkEffect.class, new FireworkEffectSerializer())
         .register(Color.class, new ColorSerializer())
-        .register(Location.class, new LocationSerializer())
+        .register(NamedLocation.class, new LocationSerializer())
         .build();
   }
 }

@@ -38,14 +38,14 @@ public class FireworkEffectSerializer implements TypeSerializer<FireworkEffect> 
     FireworkEffect.Type fireworkEffectType;
 
     try {
-      fireworkEffectType = FireworkEffect.Type.valueOf(node.node(TYPE_NODE).getString());
+      fireworkEffectType = FireworkEffect.Type.valueOf(node.node(TYPE_NODE).getString("BALL"));
     } catch (IllegalArgumentException e) {
       fireworkEffectType = FireworkEffect.Type.BALL;
       enumValueNotFound(node, TYPE_NODE);
     }
     builder.with(fireworkEffectType);
 
-    builder.trail(node.node(TYPE_NODE).getBoolean());
+    builder.trail(node.node(TRAIL_NODE).getBoolean());
 
     return builder.build();
   }
