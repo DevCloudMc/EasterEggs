@@ -7,6 +7,7 @@ import ru.brainrtp.eastereggs.EasterEggs;
 import ru.brainrtp.eastereggs.data.EggTypes;
 import ru.brainrtp.eastereggs.data.action.Action;
 import ru.brainrtp.eastereggs.data.action.Actions;
+import ru.brainrtp.eastereggs.services.EasterEggService;
 
 @Data
 public abstract class EasterEgg {
@@ -40,10 +41,15 @@ public abstract class EasterEgg {
       return;
     }
 
+    EasterEggService service = EasterEggs.getEggService();
+    // record the find before any reward, so a failing action can neither undo nor repeat it
+    if (!service.getPlayerService().addEggToPlayer(player.getUniqueId(), this)) {
+      return;
+    }
     if (actions != null) {
       actions.activate(player);
     }
-    EasterEggs.getEggService().addEggToPlayer(player, this);
+    service.finishIfComplete(player, category);
 
     //        int founded =
     // EasterEggs.getEggService().getPlayerService().getPlayerData(player.getUniqueId())

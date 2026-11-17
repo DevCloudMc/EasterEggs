@@ -13,16 +13,21 @@ You will see the following:
 
 ```kotlin
 database {
-  type: "MySQL" // Available types: MySQL
+  type: "sqlite" // sqlite or postgresql
+  // The keys below are used only by postgresql
   host: "localhost"
+  port: 5432
   database: "eastereggs"
-  port: 3306
   user: "eastereggs"
   password: "123123"
 }
 
 languageFile = "en"
 ```
+
+`sqlite` is the default and needs no setup: found eggs are kept in `plugins/EasterEggs/eastereggs.db`. With `postgresql` the plugin connects to the server from the keys above. Paper downloads HikariCP and the PostgreSQL driver on the first start, whatever the type. Any other `type` disables the plugin with an error in the log. If the database cannot be opened at startup, the plugin disables itself instead of running without saving finds. `/ee reload` also re-reads the `database` block.
+
+Breaking change in 4.0.0: MySQL support is removed and data from an existing MySQL database is not migrated, so players start with no found eggs. Set `type` to `sqlite` or `postgresql` before the first start.
 
 To get help about the plugin type `/ee help`.
 

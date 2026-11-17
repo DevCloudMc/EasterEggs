@@ -1,10 +1,8 @@
 package ru.brainrtp.eastereggs.data.placeholders;
 
-import java.util.List;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
 import ru.brainrtp.eastereggs.EasterEggs;
-import ru.brainrtp.eastereggs.data.eggs.EasterEgg;
 import ru.brainrtp.eastereggs.services.EasterEggService;
 
 public class EggsPlaceholder extends PlaceholderExpansion {
@@ -28,13 +26,12 @@ public class EggsPlaceholder extends PlaceholderExpansion {
       if (player == null) {
         return null;
       }
-      List<EasterEgg> easterEggList =
-          eggService.getPlayerService().getPlayerData(player.getUniqueId());
-      long found =
-          easterEggList == null
-              ? 0
-              : easterEggList.stream().filter(egg -> parts[1].equals(egg.getCategory())).count();
-      return String.valueOf(found);
+      return String.valueOf(
+          eggService
+              .getCategory(parts[1])
+              .map(category ->
+                  eggService.getPlayerService().countFound(player.getUniqueId(), category))
+              .orElse(0L));
     }
 
     if (parts[0].equals("count")) {

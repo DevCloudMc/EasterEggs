@@ -9,7 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -22,7 +21,6 @@ import ru.brainrtp.eastereggs.data.action.ActionFirework;
 import ru.brainrtp.eastereggs.data.action.ActionMessage;
 import ru.brainrtp.eastereggs.data.action.Actions;
 import ru.brainrtp.eastereggs.data.eggs.EasterEgg;
-import ru.brainrtp.eastereggs.storage.database.Database;
 
 public class EasterEggService {
 
@@ -42,11 +40,12 @@ public class EasterEggService {
   }
 
   // TODO: (13.02 20:43) Language is static :)
-  public EasterEggService(Plugin plugin, Language language, Database database) throws IOException {
+  public EasterEggService(Plugin plugin, Language language, PlayerEggsService playerEggsService)
+      throws IOException {
     this.eggsPath = Paths.get(plugin.getDataFolder() + File.separator + "eggs");
     this.language = language;
     this.editor = new EasterEggEditor(language);
-    this.playerEggsService = new PlayerEggsService(database);
+    this.playerEggsService = playerEggsService;
 
     if (!Files.exists(eggsPath)) {
       Files.createDirectory(eggsPath);
@@ -217,6 +216,7 @@ public class EasterEggService {
       }
 
       categ.get().removeEgg(egg);
+      playerEggsService.deleteEgg(egg);
     }
   }
 
@@ -238,7 +238,7 @@ public class EasterEggService {
       }
 
       categories.remove(categoryName);
-      playerEggsService.removeFromDatabase(category.get());
+      playerEggsService.deleteCategory(categoryName);
       editor.endEditSessionByCategory(categoryName);
       return true;
     }
@@ -246,16 +246,10 @@ public class EasterEggService {
     return false;
   }
 
-  /** Add egg to player database */
-  public void addEggToPlayer(Player player, EasterEgg egg) {
-    playerEggsService.addEggToPlayer(player.getUniqueId(), egg);
-
-    EasterEggCategory category = getCategory(egg.getCategory()).get();
-    boolean isCompleteCategory =
-        playerEggsService.isCompleteCategory(player.getUniqueId(), category);
-    if (isCompleteCategory) {
-      category.finish(player);
-    }
+  public void finishIfComplete(Player player, String categoryName) {
+    getCategory(categoryName)
+        .filter(category -> playerEggsService.isCompleteCategory(player.getUniqueId(), category))
+        .ifPresent(category -> category.finish(player));
   }
 
   /** Full reload all easter eggs from configs */
@@ -284,10 +278,6 @@ public class EasterEggService {
           int count = category.getEggs().size();
           Logger.info("Loaded {0} eggs in category {1}", count, category.getTitle());
         });
-    Bukkit.getOnlinePlayers()
-        .forEach(player -> playerEggsService.removePlayerData(player.getUniqueId()));
-    Bukkit.getOnlinePlayers()
-        .forEach(player -> playerEggsService.loadPlayerData(player.getUniqueId()));
   }
 
   public void stopEditCategory(Player player) {

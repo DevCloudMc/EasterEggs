@@ -6,7 +6,8 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import ru.brainrtp.eastereggs.EasterEggs;
 import ru.brainrtp.eastereggs.data.EasterEggCategory;
-import ru.brainrtp.eastereggs.data.eggs.EasterEgg;
+import ru.brainrtp.eastereggs.services.PlayerEggsService;
+import ru.brainrtp.eastereggs.storage.EggKey;
 
 public abstract class Command implements TabExecutor {
 
@@ -114,8 +115,8 @@ public abstract class Command implements TabExecutor {
   public abstract void execute(CommandSender sender, String[] args);
 
   private void showStats(Player player) {
-    List<EasterEgg> playerData =
-        EasterEggs.getEggService().getPlayerService().getPlayerData(player.getUniqueId());
+    PlayerEggsService playerService = EasterEggs.getEggService().getPlayerService();
+    Set<EggKey> playerData = playerService.getPlayerData(player.getUniqueId());
 
     List<EasterEggCategory> categories =
         EasterEggs.getEggService().getAllCategories().stream()
@@ -131,10 +132,7 @@ public abstract class Command implements TabExecutor {
       if (category.isHidePlayerData()) continue;
 
       //            output="§eНайдено §c%found%§e/§c%count%§e пасхалок (§6%category%§e)"
-      long playerCategoryEggCount =
-          playerData.stream()
-              .filter(playerEgg -> category.getShortCategoryName().equals(playerEgg.getCategory()))
-              .count();
+      long playerCategoryEggCount = playerService.countFound(player.getUniqueId(), category);
       int categoryEggSize = category.getEggs().size();
       String categoryTitle = category.getTitle();
       player.sendMessage(

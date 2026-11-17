@@ -2,11 +2,10 @@ package ru.brainrtp.eastereggs;
 
 import api.logging.Logger;
 import api.logging.handlers.JULHandler;
-import java.io.IOException;
 import java.nio.file.Path;
-import java.sql.SQLException;
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicePriority;
@@ -25,14 +24,14 @@ import ru.brainrtp.eastereggs.data.placeholders.EggsPlaceholder;
 import ru.brainrtp.eastereggs.listeners.*;
 import ru.brainrtp.eastereggs.serializer.ActionSerializer;
 import ru.brainrtp.eastereggs.services.EasterEggService;
-import ru.brainrtp.eastereggs.storage.database.Database;
-import ru.brainrtp.eastereggs.storage.database.MySQL;
+import ru.brainrtp.eastereggs.services.PlayerEggsService;
+import ru.brainrtp.eastereggs.storage.Storage;
 
 public class EasterEggs extends JavaPlugin implements Listener {
 
   private Configuration mainConfig;
   @Getter private static Plugin plugin;
-  private Database database;
+  private PlayerEggsService playerEggs;
   private EggsPlaceholder placeholder;
   @Getter private static Language language;
   @Getter private static EasterEggService eggService;
@@ -50,30 +49,24 @@ public class EasterEggs extends JavaPlugin implements Listener {
       mainConfig = new Configuration("config.conf", this.getDataFolder().toPath(), this);
       String languageFile = "lang_" + mainConfig.get().node("languageFile").getString();
       language = new Language(languageFile, this.getDataFolder().toPath(), this);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
 
-    ActionSerializer.init();
-    database = new MySQL(mainConfig, this);
-
-    try {
-      eggService = new EasterEggService(this, language, database);
-    } catch (IOException e) {
-      Logger.error("Cant initialize EasterEgg service. Disable plugin");
-      e.printStackTrace();
+      ActionSerializer.init();
+      playerEggs =
+          new PlayerEggsService(Storage.open(mainConfig.get().node("database"), pluginDataFolder));
+      eggService = new EasterEggService(this, language, playerEggs);
+      eggService.reloadAllEggs();
+      // plugin reload: players already online get their finds before any listener is registered
+      for (Player player : Bukkit.getOnlinePlayers()) {
+        playerEggs.loadPlayerData(player.getUniqueId());
+      }
+    } catch (Exception e) {
+      Logger.error("Could not start: {0}. Disabling the plugin", e, e.getMessage());
       getServer().getPluginManager().disablePlugin(this);
+      return;
     }
     registerListeners();
     registerCommands();
     registerServices();
-
-    eggService.reloadAllEggs();
-    try {
-      database.testDataSource();
-    } catch (SQLException e) {
-      e.printStackTrace();
-    }
   }
 
   private void registerServices() {
@@ -126,10 +119,15 @@ public class EasterEggs extends JavaPlugin implements Listener {
     if (placeholder != null) {
       placeholder.unregister();
     }
-    Bukkit.getOnlinePlayers()
-        .forEach(player -> {
-          if (eggService.getEditor().isEditMode(player.getUniqueId()))
-            eggService.stopEditCategory(player);
-        });
+    if (eggService != null) {
+      Bukkit.getOnlinePlayers()
+          .forEach(player -> {
+            if (eggService.getEditor().isEditMode(player.getUniqueId()))
+              eggService.stopEditCategory(player);
+          });
+    }
+    if (playerEggs != null) {
+      playerEggs.shutdown();
+    }
   }
 }

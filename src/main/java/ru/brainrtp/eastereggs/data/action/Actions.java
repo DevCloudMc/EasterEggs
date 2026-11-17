@@ -1,5 +1,6 @@
 package ru.brainrtp.eastereggs.data.action;
 
+import api.logging.Logger;
 import io.leangen.geantyref.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -39,8 +40,12 @@ public class Actions implements Action {
 
   @Override
   public void activate(Player player) {
-    if (!localActions.isEmpty()) {
-      localActions.forEach(action -> action.activate(player));
+    for (Action action : localActions) {
+      try {
+        action.activate(player);
+      } catch (Exception e) {
+        Logger.error("Egg action failed, the next actions still run", e);
+      }
     }
   }
 

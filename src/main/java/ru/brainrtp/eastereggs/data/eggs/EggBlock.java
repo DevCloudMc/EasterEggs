@@ -16,8 +16,7 @@ import ru.brainrtp.eastereggs.data.EggTypes;
 import ru.brainrtp.eastereggs.data.action.Actions;
 import ru.brainrtp.eastereggs.util.text.Colors;
 
-// TODO: (20.02 0:20) check this annotation work
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class EggBlock extends EasterEgg {
 
