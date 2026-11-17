@@ -27,7 +27,6 @@ dependencies {
     compileOnly 'org.spongepowered:configurate-hocon:4.2.0'
 
     compileOnly 'com.zaxxer:HikariCP:7.1.0'
-    compileOnly 'org.postgresql:postgresql:42.7.14'
 
     compileOnly 'me.clip:placeholderapi:2.12.3'
 

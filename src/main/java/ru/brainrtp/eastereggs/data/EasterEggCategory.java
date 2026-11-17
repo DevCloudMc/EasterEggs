@@ -34,7 +34,6 @@ public class EasterEggCategory {
 
   private static final String TITLE_NODE = "title";
   private static final String SHORT_CATEGORY_NAME_NODE = "category";
-  private static final String CATEGORY_NODE = "category";
   private static final String TYPE_NODE = "type";
   // TODO: (19.02 20:34) The name of the node as an action does not say much
   //  This node is responsible for the text that will be displayed to the player when /ee is
@@ -109,12 +108,10 @@ public class EasterEggCategory {
         }
 
         EasterEgg egg = child.get(eggType);
-        egg.setCategory(node.node(CATEGORY_NODE).getString());
 
         category.addEgg(egg);
       }
 
-      category.setTitle(node.node(TITLE_NODE).getString());
       category.setFinishAction(node.node(FINISH_ACTION_NODE).get(Actions.class, new Actions()));
 
       return category;

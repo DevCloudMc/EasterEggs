@@ -20,7 +20,6 @@ import ru.brainrtp.eastereggs.data.EasterEggCategory;
 import ru.brainrtp.eastereggs.data.eggs.EasterEgg;
 import ru.brainrtp.eastereggs.services.EasterEggService;
 import ru.brainrtp.eastereggs.util.highlighter.Highlighter;
-import ru.brainrtp.eastereggs.util.highlighter.Highlighters;
 import ru.brainrtp.eastereggs.util.text.Colors;
 
 public class TeleportCommand extends Command implements Listener {
@@ -85,7 +84,7 @@ public class TeleportCommand extends Command implements Listener {
         }
         player.setGameMode(GameMode.SPECTATOR);
         player.teleport(location);
-        createTempHighlight(Highlighters.create(egg.get(), player), player);
+        createTempHighlight(new Highlighter(egg.get(), player), player);
         return;
       }
 

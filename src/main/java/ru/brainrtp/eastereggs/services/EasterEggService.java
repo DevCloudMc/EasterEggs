@@ -47,7 +47,6 @@ public class EasterEggService {
     return playerEggsService;
   }
 
-  // TODO: (13.02 20:43) Language is static :)
   public EasterEggService(Plugin plugin, Language language, PlayerEggsService playerEggsService)
       throws IOException {
     this.eggsPath = Paths.get(plugin.getDataFolder() + File.separator + "eggs");

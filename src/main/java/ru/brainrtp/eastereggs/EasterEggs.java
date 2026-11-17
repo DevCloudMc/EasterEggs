@@ -92,7 +92,6 @@ public class EasterEggs extends JavaPlugin {
   private void registerCommands() {
     ru.brainrtp.eastereggs.commands.Command ee =
         new MainCommand("ee.admin", language)
-            // TODO: (19.02 22:44) Kludge, because params - static)
             .addSub("clear", new ClearPlayerDataCommand(language, eggService))
             .addSub("reload", new ReloadCommand(language, mainConfig))
             .addSub("edit", new EditCategoryCommand(language, eggService))

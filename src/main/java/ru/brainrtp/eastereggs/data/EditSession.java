@@ -7,7 +7,6 @@ import org.bukkit.entity.Player;
 import ru.brainrtp.eastereggs.EasterEggs;
 import ru.brainrtp.eastereggs.data.eggs.EasterEgg;
 import ru.brainrtp.eastereggs.util.highlighter.Highlighter;
-import ru.brainrtp.eastereggs.util.highlighter.Highlighters;
 
 public class EditSession {
 
@@ -32,7 +31,7 @@ public class EditSession {
     Optional<EasterEggCategory> category = EasterEggs.getEggService().getCategory(this.category);
     Collection<EasterEgg> eggs = category.get().getEggs().values();
     eggs.forEach(
-        easterEgg -> highlighterMap.put(easterEgg.getId(), Highlighters.create(easterEgg, player)));
+        easterEgg -> highlighterMap.put(easterEgg.getId(), new Highlighter(easterEgg, player)));
   }
 
   public void end() {
@@ -41,7 +40,7 @@ public class EditSession {
   }
 
   public void addNewEgg(EasterEgg egg) {
-    highlighterMap.put(egg.getId(), Highlighters.create(egg, player));
+    highlighterMap.put(egg.getId(), new Highlighter(egg, player));
   }
 
   public void removeHighlighter(int eggId) {
