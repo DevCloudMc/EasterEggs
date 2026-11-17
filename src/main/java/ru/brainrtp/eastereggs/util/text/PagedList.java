@@ -1,47 +1,27 @@
 package ru.brainrtp.eastereggs.util.text;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import org.bukkit.entity.Player;
-import ru.brainrtp.eastereggs.protocol.Messages;
-import ru.brainrtp.eastereggs.protocol.text.Text;
 
 public class PagedList {
 
   private static final String HEADER_LINE = "===============";
-  private static final float LIMIT = 10.0f;
+  private static final int LIMIT = 10;
 
-  private final Map<Integer, List<BaseComponent>> pages = new HashMap<>();
+  private final Map<Integer, List<Component>> pages = new HashMap<>();
   private final String title;
 
   public PagedList(String title) {
     this.title = title;
   }
 
-  public void setContent(List<BaseComponent> content) {
-    int pages = (int) Math.ceil((float) content.size() / LIMIT);
-    int counter = 0;
-
-    for (int i = 1; i < pages + 1; i++) {
-      List<BaseComponent> list = new ArrayList<>();
-      list.add(new TextComponent("\n"));
-
-      for (int j = counter; j < counter + LIMIT; j++) {
-        try {
-          BaseComponent component = content.get(j);
-          component.addExtra("\n");
-          list.add(component);
-        } catch (IndexOutOfBoundsException e) {
-          break;
-        }
-      }
-
-      counter += LIMIT;
-      this.pages.put(i, list);
+  public void setContent(List<Component> content) {
+    for (int i = 0; i * LIMIT < content.size(); i++) {
+      pages.put(i + 1, content.subList(i * LIMIT, Math.min(content.size(), (i + 1) * LIMIT)));
     }
   }
 
@@ -49,23 +29,19 @@ public class PagedList {
     return pages.size();
   }
 
-  public List<BaseComponent> getPage(int page) {
+  public List<Component> getPage(int page) {
     return pages.get(page);
   }
 
   public void openPage(int page, Player player) {
     if (pages.containsKey(page)) {
       player.sendMessage(HEADER_LINE + " " + title + " " + "(" + page + ") " + HEADER_LINE);
-      Messages.send(player, new Text("", getAsArray(pages.get(page))));
+      player.sendMessage(Component.join(JoinConfiguration.newlines(), pages.get(page)));
       player.sendMessage("");
       return;
     }
 
     // TODO: (21.02 15:14) Add :)
     //        player.sendMessage(EasterEggs.getLang().of("egg.list.empty"));
-  }
-
-  private BaseComponent[] getAsArray(List<BaseComponent> list) {
-    return list.toArray(new BaseComponent[list.size()]);
   }
 }

@@ -22,8 +22,6 @@ repositories {
 dependencies {
     compileOnly 'io.papermc.paper:paper-api:26.3.build.253-stable'
 
-    compileOnly fileTree(dir: 'libs', include: '*.jar')
-
     compileOnly 'org.projectlombok:lombok:1.18.48'
     annotationProcessor 'org.projectlombok:lombok:1.18.48'
     compileOnly 'org.spongepowered:configurate-hocon:4.2.0'
@@ -33,11 +31,6 @@ dependencies {
     compileOnly 'me.clip:placeholderapi:2.12.3'
 
     compileOnly 'com.github.MilkBowl:VaultAPI:1.7.1'
-
-    // removed in #6
-    compileOnly 'net.dmulloy2:ProtocolLib:5.4.0'
-    // removed in #6
-    compileOnly 'io.netty:netty-buffer:4.2.16.Final'
 }
 
 processResources {

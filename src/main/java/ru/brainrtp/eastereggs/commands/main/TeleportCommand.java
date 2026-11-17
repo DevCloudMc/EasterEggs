@@ -75,7 +75,7 @@ public class TeleportCommand extends Command {
     new BukkitRunnable() {
       @Override
       public void run() {
-        highlighter.clear(player);
+        highlighter.clear();
       }
     }.runTaskLater(plugin, (long) 20 * 5);
   }

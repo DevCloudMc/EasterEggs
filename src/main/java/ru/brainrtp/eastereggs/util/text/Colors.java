@@ -1,12 +1,18 @@
 package ru.brainrtp.eastereggs.util.text;
 
 import java.util.List;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 public class Colors {
 
   public static String of(String line) {
-    return ChatColor.translateAlternateColorCodes('&', line);
+    return LegacyComponentSerializer.legacySection()
+        .serialize(LegacyComponentSerializer.legacyAmpersand().deserialize(line));
+  }
+
+  public static Component component(String line) {
+    return LegacyComponentSerializer.legacySection().deserialize(of(line));
   }
 
   public static List<String> ofList(List<String> list) {

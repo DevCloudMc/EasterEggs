@@ -29,8 +29,6 @@ import ru.brainrtp.eastereggs.serializer.ActionSerializer;
 import ru.brainrtp.eastereggs.services.EasterEggService;
 import ru.brainrtp.eastereggs.storage.database.Database;
 import ru.brainrtp.eastereggs.storage.database.MySQL;
-import ru.brainrtp.eastereggs.util.highlighter.blockhighlight.BlockHighlightTimer;
-import ru.brainrtp.eastereggs.util.highlighter.blockhighlight.Util;
 
 public class EasterEggs extends JavaPlugin implements Listener {
 
@@ -41,7 +39,6 @@ public class EasterEggs extends JavaPlugin implements Listener {
   @Getter private static Language language;
   @Getter private static EasterEggService eggService;
   @Getter private static Path pluginDataFolder;
-  @Getter private static BlockHighlightTimer blockHighlightTimer;
 
   @Override
   public void onEnable() {
@@ -49,7 +46,6 @@ public class EasterEggs extends JavaPlugin implements Listener {
     Logger.init(new JULHandler(getLogger()));
     Logger.info("Starting...");
     pluginDataFolder = this.getDataFolder().toPath();
-    blockHighlightTimer = new BlockHighlightTimer(this);
 
     this.getServer().getPluginManager().registerEvents(this, this);
     try {
@@ -138,7 +134,6 @@ public class EasterEggs extends JavaPlugin implements Listener {
 
   @Override
   public void onDisable() {
-    Util.sendStopToAll();
     Bukkit.getOnlinePlayers()
         .forEach(player -> {
           if (eggService.getEditor().isEditMode(player.getUniqueId()))

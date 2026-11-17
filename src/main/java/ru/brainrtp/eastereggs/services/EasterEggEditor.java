@@ -19,8 +19,8 @@ public class EasterEggEditor {
 
   public void startEditSession(UUID uuid, String category) {
     EditSession session = new EditSession(language, Bukkit.getPlayer(uuid), category);
-    sessions.put(uuid, session);
     session.start();
+    sessions.put(uuid, session);
   }
 
   public void endEditSession(UUID uuid) {

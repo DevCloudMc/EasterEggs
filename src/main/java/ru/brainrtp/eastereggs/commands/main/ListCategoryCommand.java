@@ -2,15 +2,14 @@ package ru.brainrtp.eastereggs.commands.main;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.md_5.bungee.api.chat.BaseComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import ru.brainrtp.eastereggs.commands.Command;
 import ru.brainrtp.eastereggs.configuration.Language;
 import ru.brainrtp.eastereggs.data.eggs.EasterEgg;
-import ru.brainrtp.eastereggs.protocol.text.Text;
-import ru.brainrtp.eastereggs.protocol.text.actions.ClickActions;
-import ru.brainrtp.eastereggs.protocol.text.actions.HoverActions;
 import ru.brainrtp.eastereggs.services.EasterEggService;
 import ru.brainrtp.eastereggs.util.text.Colors;
 import ru.brainrtp.eastereggs.util.text.PagedList;
@@ -52,7 +51,7 @@ public class ListCategoryCommand extends Command {
 
     PagedList pagedList = new PagedList(language.getSingleMessage("egg", "list", "title"));
 
-    List<BaseComponent> content = new ArrayList<>();
+    List<Component> content = new ArrayList<>();
     eggService
         .getAllCategories()
         .forEach(easterEggCategory -> {
@@ -60,7 +59,7 @@ public class ListCategoryCommand extends Command {
               language
                   .getSingleMessage("egg", "list", "category")
                   .replace("{category}", easterEggCategory.getTitle());
-          content.add(new Text(title).toBaseComponent()[0]);
+          content.add(Colors.component(title));
           String subTitle;
 
           for (EasterEgg egg : easterEggCategory.getEggs().values()) {
@@ -70,13 +69,13 @@ public class ListCategoryCommand extends Command {
                     .replace("{type}", egg.getType().getStringType())
                     .replace("{id}", String.valueOf(egg.getId()));
 
-            Text text = new Text(subTitle);
-            text.onClick(
-                ClickActions.runCommand("/ee tp " + egg.getCategory() + " " + egg.getId()));
-            text.onHover(
-                HoverActions.showText(Text.of(language.getSingleMessage("egg", "list", "hover"))));
-
-            content.add(text.toBaseComponent()[0]);
+            content.add(
+                Colors.component(subTitle)
+                    .clickEvent(
+                        ClickEvent.runCommand("/ee tp " + egg.getCategory() + " " + egg.getId()))
+                    .hoverEvent(
+                        HoverEvent.showText(
+                            Colors.component(language.getSingleMessage("egg", "list", "hover")))));
           }
         });
 

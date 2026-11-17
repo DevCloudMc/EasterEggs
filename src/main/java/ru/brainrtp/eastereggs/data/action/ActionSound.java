@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 import lombok.Data;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -49,7 +51,7 @@ public class ActionSound implements Action {
 
       if (!node.isMap()) {
         try {
-          actionSound.setSound(Sound.valueOf(node.getString()));
+          actionSound.setSound(findSound(node.getString()));
         } catch (IllegalArgumentException e) {
           String pathToWarn =
               Arrays.stream(node.path().array())
@@ -61,7 +63,7 @@ public class ActionSound implements Action {
 
       } else if (!node.node(TYPE_NODE).isNull()) {
         try {
-          actionSound.setSound(Sound.valueOf(node.node(TYPE_NODE).getString()));
+          actionSound.setSound(findSound(node.node(TYPE_NODE).getString()));
         } catch (IllegalArgumentException e) {
           String pathToWarn =
               Arrays.stream(node.path().array())
@@ -92,12 +94,29 @@ public class ActionSound implements Action {
     public void serialize(Type type, @Nullable ActionSound actionSound, ConfigurationNode node)
         throws SerializationException {
       if (actionSound.getSound() != null)
-        node.node(TYPE_NODE).set(actionSound.getSound().toString());
+        node.node(TYPE_NODE).set(Registry.SOUNDS.getKey(actionSound.getSound()).value());
       if (actionSound.getLocation() != null)
         node.node(LOCATION_NODE).set(TypeToken.get(Location.class), actionSound.getLocation());
 
       node.node(PITCH_NODE).set(actionSound.getPitch());
       node.node(VOLUME_NODE).set(actionSound.getVolume());
+    }
+
+    // accepts "entity.player.levelup", "minecraft:entity.player.levelup" and the legacy enum name
+    // ENTITY_PLAYER_LEVELUP
+    private Sound findSound(String name) {
+      NamespacedKey key = name == null ? null : NamespacedKey.fromString(name.toLowerCase());
+      Sound sound = key == null ? null : Registry.SOUNDS.get(key);
+      if (sound == null && name != null) {
+        sound =
+            Registry.SOUNDS.stream()
+                .filter(
+                    s -> Registry.SOUNDS.getKey(s).value().replace('.', '_').equalsIgnoreCase(name))
+                .findFirst()
+                .orElse(null);
+      }
+      if (sound == null) throw new IllegalArgumentException(name);
+      return sound;
     }
 
     private void paramMustBeAnFloatOrInteger(ConfigurationNode node, String param) {

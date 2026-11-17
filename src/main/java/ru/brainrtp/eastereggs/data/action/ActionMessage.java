@@ -2,13 +2,13 @@ package ru.brainrtp.eastereggs.data.action;
 
 import api.logging.Logger;
 import java.lang.reflect.Type;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.Data;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.title.Title;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -51,7 +51,7 @@ public class ActionMessage implements Action {
           //                String line = HandlersProvider.getPlaceholderHandler().replace(player,
           // str);
           //                player.sendMessage(line);
-          player.sendMessage(str);
+          player.sendMessage(Colors.component(str));
         }
       }
 
@@ -59,10 +59,7 @@ public class ActionMessage implements Action {
         //                String actionBarReplaced =
         // HandlersProvider.getPlaceholderHandler().replace(player, actionbar);
         String actionBarReplaced = actionBar;
-        player
-            .spigot()
-            .sendMessage(
-                ChatMessageType.ACTION_BAR, new TextComponent(Colors.of(actionBarReplaced)));
+        player.sendActionBar(Colors.component(actionBarReplaced));
       }
 
       //            String title = HandlersProvider.getPlaceholderHandler().replace(player,
@@ -71,8 +68,14 @@ public class ActionMessage implements Action {
       // this.subtitle);
 
       if (title != null || subtitle != null)
-        player.sendTitle(
-            Colors.of(title), Colors.of(subtitle), this.fadeIn, this.stay, this.fadeOut);
+        player.showTitle(
+            Title.title(
+                Colors.component(title == null ? "" : title),
+                Colors.component(subtitle == null ? "" : subtitle),
+                Title.Times.times(
+                    Duration.ofMillis(fadeIn * 50L),
+                    Duration.ofMillis(stay * 50L),
+                    Duration.ofMillis(fadeOut * 50L))));
     }
   }
 
