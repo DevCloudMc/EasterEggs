@@ -5,44 +5,43 @@ import ru.brainrtp.eastereggs.util.text.Colors;
 
 public class TextGroup {
 
-    private final JsonArray root;
+  private final JsonArray root;
 
-    public TextGroup(Text... text) {
-        root = new JsonArray();
+  public TextGroup(Text... text) {
+    root = new JsonArray();
 
-        if (text.length > 0) {
-            root.add(Colors.of(text[0].getText()));
-        }
-
-        for (Text t : text) {
-            root.add(t.toJson());
-        }
+    if (text.length > 0) {
+      root.add(Colors.of(text[0].getText()));
     }
 
-    public TextGroup add(Text text) {
-        root.add(text.toJson());
-        return this;
+    for (Text t : text) {
+      root.add(t.toJson());
     }
+  }
 
-    public TextGroup add(String text) {
-        return add(new Text(text));
-    }
+  public TextGroup add(Text text) {
+    root.add(text.toJson());
+    return this;
+  }
 
-    public static TextGroup of(Text... text) {
-        return new TextGroup(text);
-    }
+  public TextGroup add(String text) {
+    return add(new Text(text));
+  }
 
-    public Text toText() {
-        return new Text("").setExtra(toJson());
-    }
+  public static TextGroup of(Text... text) {
+    return new TextGroup(text);
+  }
 
-    public JsonArray toJson() {
-        return root;
-    }
+  public Text toText() {
+    return new Text("").setExtra(toJson());
+  }
 
-    @Override
-    public String toString() {
-        return toJson().toString();
-    }
+  public JsonArray toJson() {
+    return root;
+  }
 
+  @Override
+  public String toString() {
+    return toJson().toString();
+  }
 }

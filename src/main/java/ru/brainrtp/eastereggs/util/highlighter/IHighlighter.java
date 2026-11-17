@@ -6,9 +6,9 @@ import ru.brainrtp.eastereggs.data.eggs.EggEntity;
 
 public interface IHighlighter {
 
-    void startBlock(Player player);
+  void startBlock(Player player);
 
-    void startEntity(Location location, EggEntity easterEgg, Player player);
+  void startEntity(Location location, EggEntity easterEgg, Player player);
 
-    void clear(Player player);
+  void clear(Player player);
 }

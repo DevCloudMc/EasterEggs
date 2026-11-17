@@ -1,5 +1,7 @@
 package ru.brainrtp.eastereggs.data.placeholders;
 
+import java.util.List;
+import java.util.Optional;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
 import ru.brainrtp.eastereggs.EasterEggs;
@@ -7,78 +9,76 @@ import ru.brainrtp.eastereggs.data.EasterEggCategory;
 import ru.brainrtp.eastereggs.data.eggs.EasterEgg;
 import ru.brainrtp.eastereggs.services.EasterEggService;
 
-import java.util.List;
-import java.util.Optional;
-
 public class EggsPlaceholder extends PlaceholderExpansion {
 
-    private final EasterEggService eggService;
+  private final EasterEggService eggService;
 
-    public EggsPlaceholder() {
-//        super(plugin, "ee");
+  public EggsPlaceholder() {
+    //        super(plugin, "ee");
 
-        eggService = EasterEggs.getEggService();
-    }
+    eggService = EasterEggs.getEggService();
+  }
 
+  @Override
+  public String onRequest(OfflinePlayer player, String identifier) {
+    //        System.out.println();
+    if (identifier.startsWith("found")) {
+      String[] catagoryTitle = identifier.split("_");
+      int founded = 0;
 
-    @Override
-    public String onRequest(OfflinePlayer player, String identifier) {
-//        System.out.println();
-        if (identifier.startsWith("found")) {
-            String[] catagoryTitle = identifier.split("_");
-            int founded = 0;
-
-            if (catagoryTitle.length == 2) {
-                List<EasterEgg> easterEggList = eggService.getPlayerService().getPlayerData(player.getUniqueId());
-                if (easterEggList != null) {
-                    int foundEasterEggs = easterEggList.stream()
-                            .filter(egg -> catagoryTitle[1].contains(egg.getCategory()))
-                            .toList()
-                            .size();
-                    founded = foundEasterEggs;
-//                    if (map.containsKey(catagoryTitle[1])) {
-//                        founded = map.get(catagoryTitle[1]).getEggs().size();
-//                    }
-                }
-            }
-
-            return String.valueOf(founded);
+      if (catagoryTitle.length == 2) {
+        List<EasterEgg> easterEggList =
+            eggService.getPlayerService().getPlayerData(player.getUniqueId());
+        if (easterEggList != null) {
+          int foundEasterEggs =
+              easterEggList.stream()
+                  .filter(egg -> catagoryTitle[1].contains(egg.getCategory()))
+                  .toList()
+                  .size();
+          founded = foundEasterEggs;
+          //                    if (map.containsKey(catagoryTitle[1])) {
+          //                        founded = map.get(catagoryTitle[1]).getEggs().size();
+          //                    }
         }
+      }
 
-        if (identifier.startsWith("count")) {
-            String[] arr = identifier.split("_");
-            int count = 0;
+      return String.valueOf(founded);
+    }
 
-            if (arr.length == 2) {
-                Optional<EasterEggCategory> categ = eggService.getCategory(arr[1]);
-                if (categ.isPresent()) {
-                    count = categ.get().getEggs().size();
-                }
-            }
+    if (identifier.startsWith("count")) {
+      String[] arr = identifier.split("_");
+      int count = 0;
 
-            return String.valueOf(count);
+      if (arr.length == 2) {
+        Optional<EasterEggCategory> categ = eggService.getCategory(arr[1]);
+        if (categ.isPresent()) {
+          count = categ.get().getEggs().size();
         }
+      }
 
-        return null;
+      return String.valueOf(count);
     }
 
-    @Override
-    public boolean persist() {
-        return true;
-    }
+    return null;
+  }
 
-    @Override
-    public String getIdentifier() {
-        return "ee";
-    }
+  @Override
+  public boolean persist() {
+    return true;
+  }
 
-    @Override
-    public String getAuthor() {
-        return "BrainRTP";
-    }
+  @Override
+  public String getIdentifier() {
+    return "ee";
+  }
 
-    @Override
-    public String getVersion() {
-        return EasterEggs.getPlugin().getPluginMeta().getVersion();
-    }
+  @Override
+  public String getAuthor() {
+    return "BrainRTP";
+  }
+
+  @Override
+  public String getVersion() {
+    return EasterEggs.getPlugin().getPluginMeta().getVersion();
+  }
 }

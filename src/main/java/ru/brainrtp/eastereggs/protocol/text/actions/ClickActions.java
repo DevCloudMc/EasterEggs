@@ -4,95 +4,95 @@ import com.google.gson.JsonObject;
 
 public abstract class ClickActions extends TextAction {
 
-    private ClickActions(String name) {
-        super(name);
+  private ClickActions(String name) {
+    super(name);
+  }
+
+  private static class RunCommand extends ClickActions {
+
+    private final String command;
+
+    public RunCommand(String command) {
+      super("run_command");
+      this.command = command;
     }
 
-    private static class RunCommand extends ClickActions {
+    @Override
+    public JsonObject toJson() {
+      JsonObject json = new JsonObject();
+      json.addProperty("action", getName());
+      json.addProperty("value", command);
+      return json;
+    }
+  }
 
-        private final String command;
+  private static class OpenURL extends ClickActions {
 
-        public RunCommand(String command) {
-            super("run_command");
-            this.command = command;
-        }
+    private final String url;
 
-        @Override
-        public JsonObject toJson() {
-            JsonObject json = new JsonObject();
-            json.addProperty("action", getName());
-            json.addProperty("value", command);
-            return json;
-        }
+    public OpenURL(String url) {
+      super("open_url");
+      this.url = url;
     }
 
-    private static class OpenURL extends ClickActions {
+    @Override
+    public JsonObject toJson() {
+      JsonObject json = new JsonObject();
+      json.addProperty("action", getName());
+      json.addProperty("value", url);
+      return json;
+    }
+  }
 
-        private final String url;
+  private static class SuggestCommand extends ClickActions {
 
-        public OpenURL(String url) {
-            super("open_url");
-            this.url = url;
-        }
+    private final String command;
 
-        @Override
-        public JsonObject toJson() {
-            JsonObject json = new JsonObject();
-            json.addProperty("action", getName());
-            json.addProperty("value", url);
-            return json;
-        }
+    public SuggestCommand(String command) {
+      super("suggest_command");
+      this.command = command;
     }
 
-    private static class SuggestCommand extends ClickActions {
+    @Override
+    public JsonObject toJson() {
+      JsonObject json = new JsonObject();
+      json.addProperty("action", getName());
+      json.addProperty("value", command);
+      return json;
+    }
+  }
 
-        private final String command;
+  private static class ChangePage extends ClickActions {
 
-        public SuggestCommand(String command) {
-            super("suggest_command");
-            this.command = command;
-        }
+    private final int page;
 
-        @Override
-        public JsonObject toJson() {
-            JsonObject json = new JsonObject();
-            json.addProperty("action", getName());
-            json.addProperty("value", command);
-            return json;
-        }
+    public ChangePage(int page) {
+      super("change_page");
+      this.page = page;
     }
 
-    private static class ChangePage extends ClickActions {
-
-        private final int page;
-
-        public ChangePage(int page) {
-            super("change_page");
-            this.page = page;
-        }
-
-        @Override
-        public JsonObject toJson() {
-            JsonObject json = new JsonObject();
-            json.addProperty("action", getName());
-            json.addProperty("value", page);
-            return json;
-        }
+    @Override
+    public JsonObject toJson() {
+      JsonObject json = new JsonObject();
+      json.addProperty("action", getName());
+      json.addProperty("value", page);
+      return json;
     }
+  }
 
-    public static RunCommand runCommand(String command) {
-        return new RunCommand(command);
-    }
+  public static RunCommand runCommand(String command) {
+    return new RunCommand(command);
+  }
 
-    public static OpenURL openURL(String url) {
-        return new OpenURL(url);
-    }
+  public static OpenURL openURL(String url) {
+    return new OpenURL(url);
+  }
 
-    public static SuggestCommand suggestCommand(String command) {
-        return new SuggestCommand(command);
-    }
+  public static SuggestCommand suggestCommand(String command) {
+    return new SuggestCommand(command);
+  }
 
-    public static ChangePage changePage(int page) {
-        return new ChangePage(page);
-    }
+  public static ChangePage changePage(int page) {
+    return new ChangePage(page);
+  }
 }

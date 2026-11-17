@@ -11,49 +11,50 @@ import ru.brainrtp.eastereggs.data.action.Actions;
 @Data
 public abstract class EasterEgg {
 
-    private int id;
+  private int id;
 
-    private String category;
+  private String category;
 
-    private EggTypes type;
+  private EggTypes type;
 
-    private Location location;
+  private Location location;
 
-    private Actions actions;
+  private Actions actions;
 
-    public void addAction(Action action) {
-        if (actions == null) {
-            actions = new Actions();
-        }
-        actions.addAction(action);
+  public void addAction(Action action) {
+    if (actions == null) {
+      actions = new Actions();
+    }
+    actions.addAction(action);
+  }
+
+  public void removeAction(String actionName) {
+    if (actions == null) {
+      actions = new Actions();
+    }
+    actions.removeAction(actionName);
+  }
+
+  public void activate(Player player) {
+    if (!player.hasPermission("ee.type." + category)) {
+      return;
     }
 
-    public void removeAction(String actionName) {
-        if (actions == null) {
-            actions = new Actions();
-        }
-        actions.removeAction(actionName);
+    if (actions != null) {
+      actions.activate(player);
     }
+    EasterEggs.getEggService().addEggToPlayer(player, this);
 
-    public void activate(Player player) {
-        if (!player.hasPermission("ee.type." + category)) {
-            return;
-        }
+    //        int founded =
+    // EasterEggs.getEggService().getPlayerService().getPlayerData(player.getUniqueId())
+    //                .get(category).getEggs().size();
+    //        int count = EasterEggs.getEggService().getCategory(category).get().getEggs().size();
+    //
+    //        Placeholder ph = new Placeholder();
+    //        ph.addData(Placeholder.PLAYER, player.getName());
+    //        ph.addData(Placeholder.CATEGORY, category);
+    //        ph.addData(Placeholder.FOUNDED_EGG, founded);
+    //        ph.addData(Placeholder.EGG_COUNT, count);
 
-        if (actions != null) {
-            actions.activate(player);
-        }
-        EasterEggs.getEggService().addEggToPlayer(player, this);
-
-//        int founded = EasterEggs.getEggService().getPlayerService().getPlayerData(player.getUniqueId())
-//                .get(category).getEggs().size();
-//        int count = EasterEggs.getEggService().getCategory(category).get().getEggs().size();
-//
-//        Placeholder ph = new Placeholder();
-//        ph.addData(Placeholder.PLAYER, player.getName());
-//        ph.addData(Placeholder.CATEGORY, category);
-//        ph.addData(Placeholder.FOUNDED_EGG, founded);
-//        ph.addData(Placeholder.EGG_COUNT, count);
-
-    }
+  }
 }

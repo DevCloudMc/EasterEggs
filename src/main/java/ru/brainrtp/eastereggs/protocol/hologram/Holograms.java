@@ -4,8 +4,7 @@ import org.bukkit.Location;
 
 public class Holograms {
 
-    public static Hologram create(Location location) {
-        return new Hologram(location);
-    }
-
+  public static Hologram create(Location location) {
+    return new Hologram(location);
+  }
 }

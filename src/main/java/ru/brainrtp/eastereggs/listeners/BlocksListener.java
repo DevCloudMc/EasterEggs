@@ -9,23 +9,23 @@ import ru.brainrtp.eastereggs.services.EasterEggService;
 
 public class BlocksListener implements Listener {
 
-    private final EasterEggService service;
+  private final EasterEggService service;
 
-    public BlocksListener() {
-        service = EasterEggs.getEggService();
-    }
+  public BlocksListener() {
+    service = EasterEggs.getEggService();
+  }
 
-    @EventHandler
-    public void onPlace(BlockPlaceEvent event) {
-        if (service.getEditor().isEditMode(event.getPlayer().getUniqueId())) {
-            event.setCancelled(true);
-        }
+  @EventHandler
+  public void onPlace(BlockPlaceEvent event) {
+    if (service.getEditor().isEditMode(event.getPlayer().getUniqueId())) {
+      event.setCancelled(true);
     }
+  }
 
-    @EventHandler
-    public void onBeak(BlockBreakEvent event) {
-        if (service.getEditor().isEditMode(event.getPlayer().getUniqueId())) {
-            event.setCancelled(true);
-        }
+  @EventHandler
+  public void onBeak(BlockBreakEvent event) {
+    if (service.getEditor().isEditMode(event.getPlayer().getUniqueId())) {
+      event.setCancelled(true);
     }
+  }
 }

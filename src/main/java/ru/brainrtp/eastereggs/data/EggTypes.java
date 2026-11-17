@@ -1,17 +1,16 @@
 package ru.brainrtp.eastereggs.data;
 
 public enum EggTypes {
+  BLOCK("BLOCK"),
+  ENTITY("ENTITY");
 
-    BLOCK("BLOCK"),
-    ENTITY("ENTITY");
+  String type;
 
-    String type;
+  EggTypes(String type) {
+    this.type = type;
+  }
 
-    EggTypes(String type) {
-        this.type = type;
-    }
-
-    public String getStringType() {
-        return type;
-    }
+  public String getStringType() {
+    return type;
+  }
 }

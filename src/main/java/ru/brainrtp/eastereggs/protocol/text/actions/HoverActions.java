@@ -8,108 +8,107 @@ import ru.brainrtp.eastereggs.protocol.text.Text;
 
 public abstract class HoverActions extends TextAction {
 
-    private HoverActions(String name) {
-        super(name);
+  private HoverActions(String name) {
+    super(name);
+  }
+
+  private static class ShowText extends HoverActions {
+
+    private final Text text;
+
+    public ShowText(Text text) {
+      super("show_text");
+      this.text = text;
     }
 
-    private static class ShowText extends HoverActions {
+    @Override
+    public JsonObject toJson() {
+      JsonObject json = new JsonObject();
+      json.addProperty("action", getName());
+      json.add("value", text.toJson());
+      return json;
+    }
+  }
 
-        private final Text text;
+  private static class ShowAchievement extends HoverActions {
 
-        public ShowText(Text text) {
-            super("show_text");
-            this.text = text;
-        }
+    private final Text text;
 
-        @Override
-        public JsonObject toJson() {
-            JsonObject json = new JsonObject();
-            json.addProperty("action", getName());
-            json.add("value", text.toJson());
-            return json;
-        }
+    public ShowAchievement(Text text) {
+      super("show_achievement");
+      this.text = text;
     }
 
-    private static class ShowAchievement extends HoverActions {
+    @Override
+    public JsonObject toJson() {
+      JsonObject json = new JsonObject();
+      return json;
+    }
+  }
 
-        private final Text text;
+  private static class ShowItem extends HoverActions {
 
-        public ShowAchievement(Text text) {
-            super("show_achievement");
-            this.text = text;
-        }
+    private final ItemStack item;
 
-        @Override
-        public JsonObject toJson() {
-            JsonObject json = new JsonObject();
-            return json;
-        }
+    public ShowItem(ItemStack item) {
+      super("show_item");
+      this.item = item;
     }
 
-    private static class ShowItem extends HoverActions {
+    @Override
+    public JsonObject toJson() {
+      JsonObject json = new JsonObject();
+      json.addProperty("action", getName());
 
-        private final ItemStack item;
+      JsonObject tag = new JsonObject();
+      JsonObject display = new JsonObject();
+      JsonArray lore = new JsonArray();
 
-        public ShowItem(ItemStack item) {
-            super("show_item");
-            this.item = item;
-        }
+      for (String l : item.getItemMeta().getLore()) {
+        lore.add(l);
+      }
 
-        @Override
-        public JsonObject toJson() {
-            JsonObject json = new JsonObject();
-            json.addProperty("action", getName());
+      display.addProperty("name", item.getItemMeta().getDisplayName());
+      display.add("Lore", lore);
+      tag.add("display", display);
+      json.add("tag", tag);
 
-            JsonObject tag = new JsonObject();
-            JsonObject display = new JsonObject();
-            JsonArray lore = new JsonArray();
+      return json;
+    }
+  }
 
-            for (String l : item.getItemMeta().getLore()) {
-                lore.add(l);
-            }
+  private static class ShowEntity extends HoverActions {
 
-            display.addProperty("name", item.getItemMeta().getDisplayName());
-            display.add("Lore", lore);
-            tag.add("display", display);
-            json.add("tag", tag);
+    private final Entity entity;
 
-            return json;
-        }
+    public ShowEntity(Entity entity) {
+      super("show_entity");
+      this.entity = entity;
     }
 
-    private static class ShowEntity extends HoverActions {
-
-        private final Entity entity;
-
-        public ShowEntity(Entity entity) {
-            super("show_entity");
-            this.entity = entity;
-        }
-
-        @Override
-        public JsonObject toJson() {
-            JsonObject json = new JsonObject();
-            json.addProperty("name", entity.getName());
-            json.addProperty("type", entity.getType().name());
-            json.addProperty("id", entity.getUniqueId().toString());
-            return json;
-        }
+    @Override
+    public JsonObject toJson() {
+      JsonObject json = new JsonObject();
+      json.addProperty("name", entity.getName());
+      json.addProperty("type", entity.getType().name());
+      json.addProperty("id", entity.getUniqueId().toString());
+      return json;
     }
+  }
 
-    public static ShowText showText(Text text) {
-        return new ShowText(text);
-    }
+  public static ShowText showText(Text text) {
+    return new ShowText(text);
+  }
 
-    public static ShowAchievement showAchievement(Text text) {
-        return new ShowAchievement(text);
-    }
+  public static ShowAchievement showAchievement(Text text) {
+    return new ShowAchievement(text);
+  }
 
-    public static ShowEntity showEntity(Entity entity) {
-        return new ShowEntity(entity);
-    }
+  public static ShowEntity showEntity(Entity entity) {
+    return new ShowEntity(entity);
+  }
 
-    public static ShowItem showItem(ItemStack item) {
-        return new ShowItem(item);
-    }
-
+  public static ShowItem showItem(ItemStack item) {
+    return new ShowItem(item);
+  }
 }

@@ -4,13 +4,13 @@ import org.bukkit.entity.Player;
 
 public interface IHologram {
 
-    int getEntityID();
+  int getEntityID();
 
-    String getText();
+  String getText();
 
-    void setText(String text);
+  void setText(String text);
 
-    void show(Player player);
+  void show(Player player);
 
-    void destroy();
+  void destroy();
 }
