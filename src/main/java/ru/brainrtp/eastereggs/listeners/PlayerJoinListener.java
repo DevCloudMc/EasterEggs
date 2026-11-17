@@ -13,19 +13,6 @@ public class PlayerJoinListener implements Listener {
     public void onLogin(AsyncPlayerPreLoginEvent e) {
         EasterEggs.getEggService().getPlayerService().loadPlayerData(e.getUniqueId());
     }
-    // TODO: (19.02 21:11) NPC never use :)
-//
-//    @EventHandler
-//    public void onJoin(PlayerJoinEvent event){
-//        Player player = event.getPlayer();
-//        player.setRemoveWhenFarAway(false);
-//
-//        Collection<INPC> npcs = EasterEggs.getNpcService().getAllNPC();
-//
-//        for(INPC npc : npcs){
-//            npc.spawn(player);
-//        }
-//    }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {

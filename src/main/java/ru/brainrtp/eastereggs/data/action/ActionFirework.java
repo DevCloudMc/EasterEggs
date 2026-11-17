@@ -45,7 +45,7 @@ public class ActionFirework implements Action {
             localEff = getRandomEffects();
         }
 
-        Firework firework = (Firework) player.getWorld().spawnEntity(location, EntityType.FIREWORK);
+        Firework firework = (Firework) player.getWorld().spawnEntity(location, EntityType.FIREWORK_ROCKET);
         FireworkMeta meta = firework.getFireworkMeta();
 
         meta.addEffects(localEff);

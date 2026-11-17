@@ -79,6 +79,6 @@ public class EggsPlaceholder extends PlaceholderExpansion {
 
     @Override
     public String getVersion() {
-        return "3.0";
+        return EasterEggs.getPlugin().getPluginMeta().getVersion();
     }
 }

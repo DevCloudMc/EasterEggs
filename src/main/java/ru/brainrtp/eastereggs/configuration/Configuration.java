@@ -12,8 +12,6 @@ import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.serialize.TypeSerializerCollection;
 import ru.brainrtp.eastereggs.data.EasterEggCategory;
-import ru.brainrtp.eastereggs.data.NPCData;
-import ru.brainrtp.eastereggs.data.Skin;
 import ru.brainrtp.eastereggs.data.action.*;
 import ru.brainrtp.eastereggs.data.eggs.EggBlock;
 import ru.brainrtp.eastereggs.data.eggs.EggEntity;
@@ -141,8 +139,6 @@ public final class Configuration {
                 .register(EasterEggCategory.class, new EasterEggCategory.Serializer())
                 .register(EggEntity.class, new EggEntity.Serializer())
                 .register(EggBlock.class, new EggBlock.Serializer())
-                .register(Skin.class, new Skin.Serializer())
-                .register(NPCData.class, new NPCData.Serializer())
                 .register(FireworkEffect.class, new FireworkEffectSerializer())
                 .register(Color.class, new ColorSerializer())
                 .register(Location.class, new LocationSerializer())

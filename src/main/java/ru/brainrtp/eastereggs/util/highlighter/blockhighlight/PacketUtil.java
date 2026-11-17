@@ -20,11 +20,7 @@ public class PacketUtil {
         Object serializer = MinecraftReflection.getPacketDataSerializer(bytes);
         handle.getModifier().withType(ByteBuf.class).write(0, serializer);
 
-        try {
-            ProtocolLibrary.getProtocolManager().sendServerPacket(receiver, handle);
-        } catch (InvocationTargetException e) {
-            throw new RuntimeException("Unable to send the packet", e);
-        }
+        ProtocolLibrary.getProtocolManager().sendServerPacket(receiver, handle);
     }
 
     public static long blockPosToLong(int x, int y, int z) {

@@ -25,7 +25,6 @@ public class ReloadCommand extends Command {
             EasterEggs.getEggService().reloadAllEggs();
             language.getConfiguration().load();
             mainConfiguration.load();
-//            EasterEggs.getNpcService().loadAllNPC();
         } catch (Exception e) {
             e.printStackTrace();
             Logger.error("Error while reloading plugin: " + e.getMessage());

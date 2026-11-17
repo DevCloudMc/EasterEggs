@@ -11,14 +11,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.plugin.java.annotation.command.Command;
-import org.bukkit.plugin.java.annotation.command.Commands;
-import org.bukkit.plugin.java.annotation.dependency.Dependency;
-import org.bukkit.plugin.java.annotation.dependency.Libraries;
-import org.bukkit.plugin.java.annotation.dependency.Library;
-import org.bukkit.plugin.java.annotation.dependency.SoftDependency;
-import org.bukkit.plugin.java.annotation.plugin.ApiVersion;
-import org.bukkit.plugin.java.annotation.plugin.author.Author;
 import ru.brainrtp.eastereggs.commands.MainCommand;
 import ru.brainrtp.eastereggs.commands.main.*;
 import ru.brainrtp.eastereggs.commands.main.action.ActionCommand;
@@ -42,16 +34,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.SQLException;
 
-@org.bukkit.plugin.java.annotation.plugin.Plugin(name = "EasterEggs", version = "3.0")
-@Dependency("ProtocolLib")
-@Dependency("Vault")
-@Dependency("GlowAPI")
-@Dependency("PacketListenerApi")
-@SoftDependency("PlaceholderAPI")
-@Author("BrainRTP")
-@Libraries({@Library("org.spongepowered:configurate-hocon:4.1.1")})
-@Commands(@Command(name = "eastereggs", desc = "EasterEggs command", aliases = {"ee"}))
-@ApiVersion(ApiVersion.Target.v1_18)
 public class EasterEggs extends JavaPlugin implements Listener {
 
     private Configuration mainConfig;
@@ -74,18 +56,6 @@ public class EasterEggs extends JavaPlugin implements Listener {
         plugin = this;
         Logger.init(new JULHandler(getLogger()));
         Logger.info("Starting...");
-        // TODO: (19.02 23:12) NPCs temporarily disabled
-//        npcBuilder = new NPCBuilder(this,
-//                NPCPool.builder(this)
-//                        .spawnDistance(60)
-//                        .actionDistance(1)
-//                        .tabListRemoveTicks(20)
-//                        .build());
-//        try {
-//            npcService = new NPCService(this);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
         pluginDataFolder = this.getDataFolder().toPath();
         blockHighlightTimer = new BlockHighlightTimer(this);
 
@@ -151,7 +121,6 @@ public class EasterEggs extends JavaPlugin implements Listener {
 
     private void registerCommands() {
         ru.brainrtp.eastereggs.commands.Command ee = new MainCommand("ee.admin", language)
-//                .addSub("reload", new ReloadCommand(language, timer, npcService))
                 // TODO: (19.02 22:44) Kludge, because params - static)
                 .addSub("clear", new ClearPlayerDataCommand(language, eggService))
                 .addSub("reload", new ReloadCommand(language, mainConfig))

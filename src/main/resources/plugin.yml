@@ -1,0 +1,13 @@
+name: EasterEggs
+version: '${version}'
+main: ru.brainrtp.eastereggs.EasterEggs
+api-version: '26.3'
+author: BrainRTP
+depend: [ProtocolLib, Vault, GlowAPI]
+softdepend: [PlaceholderAPI]
+libraries:
+  - org.spongepowered:configurate-hocon:4.2.0
+commands:
+  eastereggs:
+    description: EasterEggs command
+    aliases: [ee]
